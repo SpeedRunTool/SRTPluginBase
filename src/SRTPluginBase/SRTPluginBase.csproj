@@ -1,24 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <Platforms>AnyCPU</Platforms>
-    <Authors>Travis J. Gutjahr</Authors>
-    <Company>Travis J. Gutjahr</Company>
-    <Copyright>Copyright © 2022 Travis J. Gutjahr</Copyright>
-    <Product>SRT Plugin Base</Product>
-    <Description>The plugin interfaces required to develop plugins for the SRT Host.</Description>
-    <Version>4.0.0.0</Version>
-    <FileVersion>4.0.0.0</FileVersion>
-    <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <DebugType>embedded</DebugType>
-	<Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Platforms>AnyCPU</Platforms>
+	</PropertyGroup>
 	
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="6.*" />
-  </ItemGroup>
+	<PropertyGroup>
+		<Product>SRT Plugin Base</Product>
+		<Description>The base classes and interfaces needed to implement a plugin for the SRTHost platform.</Description>
+		<Company>SpeedRunTool</Company>
+		<Authors>$(Company)</Authors>
+		<Copyright>Copyright © 2022 $(Company)</Copyright>
+		<Version>4.0.0.0</Version>
+		<FileVersion>4.0.0.0</FileVersion>
+		<AssemblyVersion>4.0.0.0</AssemblyVersion>
+		<PackageId>SRTPluginBase</PackageId>
+		<PackageDescription>$(Description)</PackageDescription>
+		<RepositoryUrl>https://github.com/$(Company)/$(PackageId)</RepositoryUrl>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<DebugType>embedded</DebugType>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="6.*" />
+	</ItemGroup>
   
 </Project>
