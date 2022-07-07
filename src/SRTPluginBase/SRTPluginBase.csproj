@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Platforms>AnyCPU</Platforms>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<Product>SRT Plugin Base</Product>
+		<Description>The base classes and interfaces needed to implement a plugin for the SRTHost platform.</Description>
+		<Company>SpeedRunTool</Company>
+		<Authors>$(Company)</Authors>
+		<Copyright>Copyright © 2022 $(Company)</Copyright>
+		<Version>4.0.0.0</Version>
+		<FileVersion>4.0.0.0</FileVersion>
+		<AssemblyVersion>4.0.0.0</AssemblyVersion>
+		<PackageId>SRTPluginBase</PackageId>
+		<PackageDescription>$(Description)</PackageDescription>
+		<RepositoryUrl>https://github.com/$(Company)/$(PackageId)</RepositoryUrl>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<DebugType>embedded</DebugType>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="6.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+		<None Include="..\..\LICENSE" Pack="true" PackagePath="\"/>
+	</ItemGroup>
+  
+</Project>
