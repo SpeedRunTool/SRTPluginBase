@@ -1,0 +1,43 @@
+name: "Automated Release"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: "windows-latest"
+    
+    env:
+      BUILD_CONFIG: 'Release'
+      BUILD_PLATFORM: 'Any CPU'
+      SOLUTION: 'SRTPluginBase.sln'
+
+    steps:
+    # Checkout latest code
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.6
+
+    - name: Restore dependencies
+      run: nuget restore $env:SOLUTION
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Build
+      run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM" --no-restore
+
+    - name: Run tests
+      run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM" --no-restore --no-build --verbosity normal
+
+    - name: Publish
+      run: nuget push **\*.nupkg -Source "https://api.nuget.org/v3/index.json" -ApiKey "${{secrets.NUGET_API_KEY}}" -SkipDuplicate
