@@ -33,10 +33,24 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$(version)$env:RELEASE_TYPE.${{github.sha}}" --no-restore
+      run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$(version)$env:RELEASE_TYPE.${{ github.sha }}" --no-restore
 
     - name: Run tests
-      run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$(version)$env:RELEASE_TYPE.${{github.sha}}" --no-restore --no-build --verbosity normal
+      run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$(version)$env:RELEASE_TYPE.${{ github.sha }}" --no-restore --no-build --verbosity normal
+      
+    # Decode the base 64 encoded pfx and save the code signing certificate
+    - name: Decode the pfx
+      run: |
+        Set-Content -Path "CodeSign.txt" -Value "${{ secrets.CERTIFICATE }}"
+        certutil -decode "CodeSign.txt" "CodeSign.pfx"
+        Remove-Item -Path "CodeSign.txt"
+        
+    - name: Code sign the nupkg
+      run: |
+        $filesToZip = (Get-ChildItem -Path 'src/' -Filter *.nupkg).fullname
+        foreach ($fileToZip in $filesToZip) {
+        & dotnet nuget sign "$fileToZip" --certificate-path "CodeSign.pfx" --certificate-password "${{secrets.CERTIFICATE_PASS}}" --timestamper "http://timestamp.digicert.com"
+        }
 
     - name: Publish
       run: nuget push **\*.nupkg -Source "https://api.nuget.org/v3/index.json" -ApiKey "${{secrets.NUGET_API_KEY}}" -SkipDuplicate
