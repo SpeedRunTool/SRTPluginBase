@@ -13,7 +13,6 @@ jobs:
       SOLUTION: 'SRTPluginBase.sln'
       PROJECT: 'src/SRTPluginBase/SRTPluginBase.csproj'
       RELEASE_TYPE: '-alpha' # Use -alpha, -beta, or -rc for pre-release. An empty string for stable.
-      VERSION: '${{steps.project-versions.Version_Major}}.${{steps.project-versions.Version_Minor}}.${{steps.project-versions.Version_Patch}}$env:RELEASE_TYPE.${{github.sha}}'
 
     steps:
     # Checkout latest code
@@ -40,9 +39,13 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
+      env:
+        VERSION: '${{steps.project-versions.Version_Major}}.${{steps.project-versions.Version_Minor}}.${{steps.project-versions.Version_Patch}}$env:RELEASE_TYPE.${{github.sha}}'
       run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$env:VERSION" --no-restore
 
     - name: Run tests
+      env:
+        VERSION: '${{steps.project-versions.Version_Major}}.${{steps.project-versions.Version_Minor}}.${{steps.project-versions.Version_Patch}}$env:RELEASE_TYPE.${{github.sha}}'
       run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$env:VERSION" --no-restore --no-build --verbosity normal
       
     - name: Decode the pfx
