@@ -14,6 +14,7 @@ jobs:
       BUILD_CONFIG: 'Release'
       BUILD_PLATFORM: 'Any CPU'
       SOLUTION: 'SRTPluginBase.sln'
+      PROJECT: 'src/SRTPluginBase/SRTPluginBase.csproj'
 
     steps:
     # Checkout latest code
@@ -21,6 +22,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        
+    # Get the project's version numbers
+    - name: Get project version information
+      id: project-versions
+      run: Select-String -Path "$env:PROJECT" '<(?<TagName>\w*?Version)>(?<Major>\d+)(?:\.(?<Minor>\d+))(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?</\w*?Version>' -AllMatches | Foreach-Object -Process {$_.Matches} | Foreach-Object -Process { $tagName = $_.Groups["TagName"].Value; $_.Groups | Where-Object { $_.Name -ne "0" -and $_.Name -ne "TagName"; } } | Foreach-Object -Process { "::set-output name=" + $tagName + "_" + $_.Name + "::" + $_.Value; }
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.6
@@ -34,9 +40,13 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
+      env:
+        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}.${{github.sha}}'
       run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM" --no-restore
 
     - name: Run tests
+      env:
+        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}.${{github.sha}}'
       run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM" --no-restore --no-build --verbosity normal
       
     - name: Decode the pfx

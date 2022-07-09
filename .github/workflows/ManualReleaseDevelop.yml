@@ -11,6 +11,7 @@ jobs:
       BUILD_CONFIG: 'Release'
       BUILD_PLATFORM: 'Any CPU'
       SOLUTION: 'SRTPluginBase.sln'
+      PROJECT: 'src/SRTPluginBase/SRTPluginBase.csproj'
       RELEASE_TYPE: '-alpha' # Use -alpha, -beta, or -rc for pre-release. An empty string for stable.
 
     steps:
@@ -20,6 +21,11 @@ jobs:
       with:
         fetch-depth: 0
         ref: develop
+        
+    # Get the project's version numbers
+    - name: Get project version information
+      id: project-versions
+      run: Select-String -Path "$env:PROJECT" '<(?<TagName>\w*?Version)>(?<Major>\d+)(?:\.(?<Minor>\d+))(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?</\w*?Version>' -AllMatches | Foreach-Object -Process {$_.Matches} | Foreach-Object -Process { $tagName = $_.Groups["TagName"].Value; $_.Groups | Where-Object { $_.Name -ne "0" -and $_.Name -ne "TagName"; } } | Foreach-Object -Process { "::set-output name=" + $tagName + "_" + $_.Name + "::" + $_.Value; }
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.6
@@ -33,12 +39,15 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Build
-      run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$(version)$env:RELEASE_TYPE.${{ github.sha }}" --no-restore
+      env:
+        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.RELEASE_TYPE}}.${{github.sha}}'
+      run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$env:VERSION" --no-restore
 
     - name: Run tests
-      run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$(version)$env:RELEASE_TYPE.${{ github.sha }}" --no-restore --no-build --verbosity normal
+      env:
+        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.RELEASE_TYPE}}.${{github.sha}}'
+      run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$env:VERSION" --no-restore --no-build --verbosity normal
       
-    # Decode the base 64 encoded pfx and save the code signing certificate
     - name: Decode the pfx
       run: |
         Set-Content -Path "CodeSign.txt" -Value "${{ secrets.CERTIFICATE }}"
@@ -47,7 +56,7 @@ jobs:
         
     - name: Code sign the nupkg
       run: |
-        $filesToZip = (Get-ChildItem -Path 'src/' -Filter *.nupkg).fullname
+        $filesToZip = (Get-ChildItem -Path 'src/' -Filter *.nupkg -Recurse).fullname
         foreach ($fileToZip in $filesToZip) {
         & dotnet nuget sign "$fileToZip" --certificate-path "CodeSign.pfx" --certificate-password "${{secrets.CERTIFICATE_PASS}}" --timestamper "http://timestamp.digicert.com"
         }
