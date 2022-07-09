@@ -40,12 +40,12 @@ jobs:
 
     - name: Build
       env:
-        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}$env:RELEASE_TYPE.${{github.sha}}'
+        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.RELEASE_TYPE}}.${{github.sha}}'
       run: dotnet build $env:SOLUTION /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$env:VERSION" --no-restore
 
     - name: Run tests
       env:
-        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}$env:RELEASE_TYPE.${{github.sha}}'
+        VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.RELEASE_TYPE}}.${{github.sha}}'
       run: dotnet test /p:"Configuration=$env:BUILD_CONFIG;Platform=$env:BUILD_PLATFORM;VERSION=$env:VERSION" --no-restore --no-build --verbosity normal
       
     - name: Decode the pfx
