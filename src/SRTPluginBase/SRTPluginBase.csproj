@@ -13,9 +13,9 @@
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
 		<Copyright>Copyright © 2022 $(Company)</Copyright>
-		<Version>4.0.0</Version>
-		<FileVersion>4.0.0</FileVersion>
-		<AssemblyVersion>4.0.0</AssemblyVersion>
+		<Version>4.0.1</Version>
+		<FileVersion>4.0.1</FileVersion>
+		<AssemblyVersion>4.0.1</AssemblyVersion>
 		<PackageId>SRTPluginBase</PackageId>
 		<PackageDescription>$(Description)</PackageDescription>
 		<RepositoryUrl>https://github.com/$(Company)/$(PackageId)</RepositoryUrl>
