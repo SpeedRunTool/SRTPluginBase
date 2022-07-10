@@ -24,7 +24,7 @@ jobs:
         
     - name: Get current UTC DateTime
       id: get-datetime
-      run: '::set-output name=UTCDateTime::' + [System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss")
+      run: echo ('::set-output name=UTCDateTime::' + [System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))
         
     - name: Get project version information
       id: project-versions
