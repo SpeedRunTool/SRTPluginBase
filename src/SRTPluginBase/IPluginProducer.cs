@@ -8,7 +8,7 @@ namespace SRTPluginBase
         /// Instructs the producer plugin to retrieve data and return a structure representing the data retrieved.
         /// </summary>
         /// <returns>Plugin-specific data structure.</returns>
-        object PullData();
+        object? PullData();
 
         /// <summary>
         /// Whether the producer is available or not.
