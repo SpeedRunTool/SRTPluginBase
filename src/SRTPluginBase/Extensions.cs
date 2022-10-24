@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text.Json;
 
@@ -6,7 +7,9 @@ namespace SRTPluginBase
 {
     public static class Extensions
     {
-        public static bool ByteArrayEquals(this byte[] first, byte[] second)
+        public static bool ByteArrayEquals(this byte[] first, byte[] second) => ByteArrayEquals(new ReadOnlySpan<byte>(first), new ReadOnlySpan<byte>(second));
+
+        public static bool ByteArrayEquals(this ReadOnlySpan<byte> first, ReadOnlySpan<byte> second)
         {
             // Check to see if the have the same reference.
             if (first == second)
@@ -21,11 +24,11 @@ namespace SRTPluginBase
                 return false;
 
             // Check each element side by side for equality.
-            for (int i = 0; i < first.Length; i++)
+            for (int i = 0; i < first.Length; ++i)
                 if (first[i] != second[i])
                     return false;
 
-            // We made it past the for loop, we're equals!
+            // We made it past the for loop, we're equal!
             return true;
         }
 

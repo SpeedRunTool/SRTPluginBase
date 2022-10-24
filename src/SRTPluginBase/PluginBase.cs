@@ -1,22 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Net;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SRTPluginBase
 {
     public abstract class PluginBase : IPlugin
     {
         public abstract IPluginInfo Info { get; }
-
-        public abstract int Startup();
-
-        public abstract int Shutdown();
-
-        public virtual object? CommandHandler(string command, KeyValuePair<string, string[]>[] arguments, out HttpStatusCode statusCode)
-        {
-            statusCode = HttpStatusCode.NotImplemented;
-            return null;
-        }
 
         public string GetConfigFile(Assembly a) => a.GetConfigFile();
 
@@ -27,5 +16,7 @@ namespace SRTPluginBase
         public void SaveConfiguration<T>(T configuration, string? configFile = null) where T : class, new() => configuration.SaveConfiguration(configFile);
 
         public bool Equals(IPlugin? other) => (this as IPlugin).Equals(other);
+
+        public abstract ValueTask DisposeAsync();
     }
 }
