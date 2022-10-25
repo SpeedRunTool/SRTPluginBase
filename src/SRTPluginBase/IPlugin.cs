@@ -3,7 +3,7 @@ using System;
 
 namespace SRTPluginBase
 {
-    public interface IPlugin : IEquatable<IPlugin>, IAsyncDisposable
+    public interface IPlugin : IDisposable, IAsyncDisposable, IEquatable<IPlugin>
     {
         /// <summary>
         /// Gets the plugins type name.
