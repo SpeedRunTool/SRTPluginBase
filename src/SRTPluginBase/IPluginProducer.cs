@@ -5,20 +5,22 @@ namespace SRTPluginBase
     public interface IPluginProducer : IPlugin, IEquatable<IPluginProducer>
     {
         /// <summary>
-        /// Instructs the producer plugin to retrieve data and return a structure representing the data retrieved.
+        /// Requests the producer plugin to update the Data property.
         /// </summary>
-        /// <returns>Plugin-specific data structure.</returns>
-        object? PullData();
+        void Refresh();
 
         /// <summary>
-        /// Whether the producer is available or not.
+        /// The most recent plugin-specific data structure for this producer.
         /// </summary>
-        bool Available { get; }
+        object? Data { get; }
 
-        public new bool Equals(IPluginProducer? other) => TypeName == other?.TypeName && Info.Name == other?.Info.Name;
+        /// <summary>
+        /// The DateTime representing the last time the Data property was updated. This value is null if the Data property has not been populated.
+        /// </summary>
+        DateTime? LastUpdated { get; }
 
-        public new bool Equals(object? obj) => Equals(obj as IPluginProducer);
+        public new bool Equals(IPluginProducer? other) => (this as IPlugin).Equals(other);
 
-        public new int GetHashCode() => HashCode.Combine(this as IPlugin, Available);
+        public new int GetHashCode() => (this as IPlugin).GetHashCode();
     }
 }
