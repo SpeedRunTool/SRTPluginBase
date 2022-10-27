@@ -7,7 +7,7 @@ namespace SRTPluginBase
     {
         public abstract IPluginInfo Info { get; }
 
-        public abstract IPluginHost Host { get; }
+        public abstract IPluginHost? Host { get; set; }
 
         public string GetConfigFile(Assembly a) => a.GetConfigFile();
 
