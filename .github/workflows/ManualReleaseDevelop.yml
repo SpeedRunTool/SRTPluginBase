@@ -27,7 +27,7 @@ jobs:
         
     - name: Get project version information
       id: project-versions
-      run: Select-String -Path "$env:PROJECT" '<(?<TagName>\w*?Version)>(?<Major>\d+)(?:\.(?<Minor>\d+))(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?</\w*?Version>' -AllMatches | Foreach-Object -Process {$_.Matches} | Foreach-Object -Process { $tagName = $_.Groups["TagName"].Value; $_.Groups | Where-Object { $_.Name -ne "0" -and $_.Name -ne "TagName"; } } | Foreach-Object -Process { echo ($tagName + "_" + $_.Name + "=" + $_.Value) >> $GITHUB_OUTPUT; }
+      run: Select-String -Path "$env:PROJECT" '<(?<TagName>\w*?Version)>(?<Major>\d+)(?:\.(?<Minor>\d+))(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?(?:\.(?<Patch>\d+)|-(?<Quality>\w+)|\+(?<Tag>\w+))?</\w*?Version>' -AllMatches | Foreach-Object -Process {$_.Matches} | Foreach-Object -Process { $tagName = $_.Groups["TagName"].Value; $_.Groups | Where-Object { $_.Name -ne "0" -and $_.Name -ne "TagName"; } } | Foreach-Object -Process { $tagName + "_" + $_.Name + "=" + $_.Value >> $GITHUB_OUTPUT }
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.1.1
