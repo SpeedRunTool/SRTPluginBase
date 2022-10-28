@@ -33,7 +33,7 @@ jobs:
       id: assert-version
       env:
         VERSION: '${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.RELEASE_TYPE}}.${{steps.get-datetime.outputs.UTCDateTime}}'
-      if: ${{env.VERSION}} == '..' + ${{env.RELEASE_TYPE}} + '.'
+      if: ${{ env.VERSION == '..' + env.RELEASE_TYPE + '.' }}
       run: exit 1
 
     - name: Setup NuGet
