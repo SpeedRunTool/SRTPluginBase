@@ -11,11 +11,11 @@ jobs:
     runs-on: "windows-latest"
     
     env:
+      RELEASE_TYPE: '' # Use -alpha, -beta, or -rc for pre-release. An empty string for stable.  
       BUILD_CONFIG: 'Release'
       BUILD_PLATFORM: 'Any CPU'
       SOLUTION: 'SRTPluginBase.sln'
       PROJECT: 'src/SRTPluginBase/SRTPluginBase.csproj'
-      RELEASE_TYPE: '' # Use -alpha, -beta, or -rc for pre-release. An empty string for stable.
 
     steps:
     - name: Checkout
