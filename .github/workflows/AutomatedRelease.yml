@@ -38,7 +38,7 @@ jobs:
 
     - name: Ensure we detected the version properly
       id: assert-version
-      if: ${{ steps.project-version-string.outputs.Version == format('..{0}.', env.release-type) }}
+      if: ${{ steps.project-version-string.outputs.Version == format('..{0}.', env.RELEASE_TYPE) }}
       run: exit 1
 
     - name: Setup NuGet
