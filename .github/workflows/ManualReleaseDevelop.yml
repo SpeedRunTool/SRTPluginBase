@@ -32,7 +32,7 @@ jobs:
     - name: Set project version string
       id: project-version-string
       run: |
-        echo 'Version=${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.release-type}}.${{steps.get-datetime.outputs.UTCDateTime}}' >> $env:GITHUB_OUTPUT
+        echo 'Version=${{steps.project-versions.outputs.Version_Major}}.${{steps.project-versions.outputs.Version_Minor}}.${{steps.project-versions.outputs.Version_Patch}}${{env.RELEASE_TYPE}}.${{steps.get-datetime.outputs.UTCDateTime}}' >> $env:GITHUB_OUTPUT
 
     - name: Ensure we detected the version properly
       id: assert-version
