@@ -13,9 +13,9 @@
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
 		<Copyright>Copyright © 2022 $(Company)</Copyright>
-		<Version>4.0.2</Version>
-		<FileVersion>4.0.2</FileVersion>
-		<AssemblyVersion>4.0.2</AssemblyVersion>
+		<Version>4.0.3</Version>
+		<FileVersion>4.0.3</FileVersion>
+		<AssemblyVersion>4.0.0</AssemblyVersion>
 		<PackageId>SRTPluginBase</PackageId>
 		<PackageDescription>$(Description)</PackageDescription>
 		<RepositoryUrl>https://github.com/$(Company)/$(PackageId)</RepositoryUrl>
@@ -23,10 +23,18 @@
 
 	<PropertyGroup>
 		<DebugType>embedded</DebugType>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 	
 	<ItemGroup>
