@@ -17,11 +17,6 @@ namespace SRTPluginBase
         IPluginInfo Info { get; }
 
         /// <summary>
-        /// The host implementation that loaded this plugin. This provides methods for interacting with other plugins in the system. This value is null until the host updates the property after the plugin is loaded and the constructor is called.
-        /// </summary>
-        IPluginHost? Host { get; set; }
-
-        /// <summary>
         /// This method is called when an HTTP request comes in that is not automatically handled by the SRT framework.
         /// </summary>
         /// <param name="controller">The controller that received the request.</param>

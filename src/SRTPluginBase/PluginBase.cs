@@ -7,8 +7,6 @@ namespace SRTPluginBase
     {
         public abstract IPluginInfo Info { get; }
 
-        public abstract IPluginHost? Host { get; set; }
-
         public string GetConfigFile(Assembly a) => a.GetConfigFile();
 
         public virtual T LoadConfiguration<T>() where T : class, new() => Extensions.LoadConfiguration<T>(null);
