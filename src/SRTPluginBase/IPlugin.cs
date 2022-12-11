@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading.Tasks;
 
 namespace SRTPluginBase
 {
@@ -24,10 +25,10 @@ namespace SRTPluginBase
         /// This method is called when an HTTP request comes in that is not automatically handled by the SRT framework.
         /// </summary>
         /// <param name="controller">The controller that received the request.</param>
-        /// <returns>An IActionResult for the request.</returns>
-        virtual IActionResult HttpHandler(ControllerBase controller)
+        /// <returns>An Task&gt;IActionResult&lt; for the request.</returns>
+        virtual Task<IActionResult> HttpHandlerAsync(ControllerBase controller)
         {
-            return controller.NoContent();
+            return Task.FromResult<IActionResult>(controller.NoContent());
         }
 
         public new bool Equals(IPlugin? other) => TypeName == other?.TypeName && Info.Name == other?.Info.Name;
