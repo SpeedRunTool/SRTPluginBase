@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Hosting;
 
 namespace SRTPluginBase
 {
-    public interface IPluginHost
+    public interface IPluginHost : IHostedService
     {
         /// <summary>
         /// Retrieves a loaded plugin by name.
