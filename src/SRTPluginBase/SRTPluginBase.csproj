@@ -12,7 +12,7 @@
 		<Description>The base classes and interfaces needed to implement a plugin for the SRTHost platform.</Description>
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
-		<Copyright>Copyright © 2022 $(Company)</Copyright>
+		<Copyright>Copyright © 2023 $(Company)</Copyright>
 		<Version>4.0.5</Version>
 		<FileVersion>4.0.5</FileVersion>
 		<AssemblyVersion>4.0.0</AssemblyVersion>
