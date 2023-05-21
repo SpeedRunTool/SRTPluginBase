@@ -23,7 +23,7 @@ namespace SRTPluginBase
         /// </summary>
         /// <param name="controller">The controller that received the request.</param>
         /// <returns>An Task&gt;IActionResult&lt; for the request.</returns>
-        virtual Task<IActionResult> HttpHandlerAsync(ControllerBase controller)
+        virtual Task<IActionResult> HttpHandlerAsync(Controller controller)
         {
             return Task.FromResult<IActionResult>(controller.NoContent());
         }

@@ -37,9 +37,7 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="*" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="*" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="*" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="*" />
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="*">
 			<Private>false</Private>
 			<ExcludeAssets>runtime</ExcludeAssets>
