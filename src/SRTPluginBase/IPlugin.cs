@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SRTPluginBase
@@ -26,7 +28,13 @@ namespace SRTPluginBase
             return Task.FromResult<IActionResult>(controller.NoContent());
         }
 
-        public new bool Equals(IPlugin? other) => TypeName == other?.TypeName && Info.Name == other?.Info.Name;
+		virtual Task<int> DbNonQuery(string query, IDbTransaction dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<int>(default);
+
+		virtual Task<object?> DbScalar(string query, IDbTransaction dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<object?>(default);
+
+		virtual Task<IDataReader?> DbReader(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => Task.FromResult<IDataReader?>(default);
+
+		public new bool Equals(IPlugin? other) => TypeName == other?.TypeName && Info.Name == other?.Info.Name;
 
         public bool Equals(object? obj) => Equals(obj as IPlugin);
 

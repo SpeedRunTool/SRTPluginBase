@@ -33,9 +33,10 @@ namespace SRTPluginBase
         }
 
         public static readonly JsonSerializerOptions JSO = new JsonSerializerOptions() { AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip, WriteIndented = true };
-        public static string GetConfigFile(this Assembly a) => Path.Combine(new FileInfo(a.Location).DirectoryName, string.Format("{0}.cfg", Path.GetFileNameWithoutExtension(new FileInfo(a.Location).Name)));
+		public static string GetConfigFile(this Assembly a) => Path.Combine(new FileInfo(a.Location).DirectoryName, string.Format("{0}.cfg", GetPluginNameFromFilename(a)));
+		public static string GetPluginNameFromFilename(this Assembly a) => Path.GetFileNameWithoutExtension(new FileInfo(a.Location).Name);
 
-        public static T LoadConfiguration<T>() where T : class, new() => LoadConfiguration<T>(null);
+		public static T LoadConfiguration<T>() where T : class, new() => LoadConfiguration<T>(null);
         public static T LoadConfiguration<T>(string? configFile = null) where T : class, new()
         {
             // TODO: ILogger
