@@ -36,8 +36,8 @@ namespace SRTPluginBase
 		public static string GetConfigFile(this Assembly a) => Path.Combine(new FileInfo(a.Location).DirectoryName, string.Format("{0}.cfg", GetPluginNameFromFilename(a)));
 		public static string GetPluginNameFromFilename(this Assembly a) => Path.GetFileNameWithoutExtension(new FileInfo(a.Location).Name);
 
-		public static T LoadConfiguration<T>() where T : class, new() => LoadConfiguration<T>(null);
-        public static T LoadConfiguration<T>(string? configFile = null) where T : class, new()
+		public static T LoadConfiguration<T>() where T : class => LoadConfiguration<T>(null);
+        public static T LoadConfiguration<T>(string? configFile = null) where T : class
         {
             // TODO: ILogger
             if (configFile == null)
@@ -47,19 +47,19 @@ namespace SRTPluginBase
             {
                 if (File.Exists(configFile))
                     using (FileStream fs = new FileStream(configFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-                        return JsonSerializer.DeserializeAsync<T>(fs, JSO).Result ?? new T();
+                        return JsonSerializer.DeserializeAsync<T>(fs, JSO).Result ?? Activator.CreateInstance<T>();
                 else
-                    return new T(); // File did not exist, just return a new instance.
+                    return Activator.CreateInstance<T>(); // File did not exist, just return a new instance.
             }
             catch
             {
                 // TODO: ILogger
-                return new T(); // An exception occurred when reading the file, return a new instance.
+                return Activator.CreateInstance<T>(); // An exception occurred when reading the file, return a new instance.
             }
         }
 
-        public static void SaveConfiguration<T>(this T configuration) where T : class, new() => SaveConfiguration<T>(configuration, null);
-        public static void SaveConfiguration<T>(this T configuration, string? configFile = null) where T : class, new()
+        public static void SaveConfiguration<T>(this T configuration) where T : class => SaveConfiguration<T>(configuration, null);
+        public static void SaveConfiguration<T>(this T configuration, string? configFile = null) where T : class
         {
             // TODO: ILogger
             if (configFile == null)

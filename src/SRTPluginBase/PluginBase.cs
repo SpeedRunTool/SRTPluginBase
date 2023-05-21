@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SRTPluginBase
 {
-    public abstract class PluginBase<T> : IPlugin where T : class, IPlugin, new()
+    public abstract class PluginBase<T> : IPlugin where T : class, IPlugin
 	{
         private readonly SqliteConnection sqliteConnection;
 
