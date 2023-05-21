@@ -28,11 +28,11 @@ namespace SRTPluginBase
             return Task.FromResult<IActionResult>(controller.NoContent());
         }
 
-		virtual int DbNonQuery(string query, IDbTransaction dbTransaction, params IDbDataParameter[] dbDataParameters) => default;
-		virtual Task<int> DbNonQueryAsync(string query, IDbTransaction dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<int>(default);
+		virtual int DbNonQuery(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => default;
+		virtual Task<int> DbNonQueryAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<int>(default);
 
-		virtual object? DbScalar(string query, IDbTransaction dbTransaction, params IDbDataParameter[] dbDataParameters) => default;
-		virtual Task<object?> DbScalarAsync(string query, IDbTransaction dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<object?>(default);
+		virtual object? DbScalar(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => default;
+		virtual Task<object?> DbScalarAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<object?>(default);
 
 		virtual IDataReader? DbReader(string query, IDbTransaction? dbTransaction, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => default;
 		virtual Task<IDataReader?> DbReaderAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => Task.FromResult<IDataReader?>(default);
