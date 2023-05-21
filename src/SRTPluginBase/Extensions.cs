@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -92,19 +93,46 @@ namespace SRTPluginBase
 
         private const string SQLITE_QUERY_OBJECT_EXISTS = "SELECT IIF(EXISTS(SELECT 1 FROM [sqlite_schema] WHERE [type] = '{0}' AND [name] = @name), 1, 0);";
 		private const string SQLITE_QUERY_COLUMN_EXISTS = "SELECT IIF(EXISTS(SELECT 1 FROM PRAGMA_table_info(@name) WHERE [name] = @columnName), 1, 0);";
-		private static bool SqliteObjectExists(this IPlugin plugin, string name, SqliteObjectType type) => (int)(plugin.DbScalar(string.Format(SQLITE_QUERY_OBJECT_EXISTS, type.ToString().ToLowerInvariant()), default, new SqliteParameter("@name", name)) ?? 0) == 1;
-		private static async Task<bool> SqliteObjectExistsAsync(this IPlugin plugin, string name, SqliteObjectType type, CancellationToken cancellationToken) => (int)(await plugin.DbScalarAsync(string.Format(SQLITE_QUERY_OBJECT_EXISTS, type.ToString().ToLowerInvariant()), default, cancellationToken, new SqliteParameter("@name", name)) ?? 0) == 1;
+		private static bool SqliteObjectExists(this IPlugin plugin, string name, SqliteObjectType type) => (long)(plugin.DbScalar(string.Format(SQLITE_QUERY_OBJECT_EXISTS, type.ToString().ToLowerInvariant()), default, new SqliteParameter("@name", name)) ?? 0L) == 1L;
+		private static async Task<bool> SqliteObjectExistsAsync(this IPlugin plugin, string name, SqliteObjectType type, CancellationToken cancellationToken) => (long)(await plugin.DbScalarAsync(string.Format(SQLITE_QUERY_OBJECT_EXISTS, type.ToString().ToLowerInvariant()), default, cancellationToken, new SqliteParameter("@name", name)) ?? 0L) == 1L;
 
 		public static bool SqliteTableExists(this IPlugin plugin, string name) => SqliteObjectExists(plugin, name, SqliteObjectType.Table);
 		public static bool SqliteIndexExists(this IPlugin plugin, string name) => SqliteObjectExists(plugin, name, SqliteObjectType.Index);
 		public static bool SqliteViewExists(this IPlugin plugin, string name) => SqliteObjectExists(plugin, name, SqliteObjectType.View);
 		public static bool SqliteTriggerExists(this IPlugin plugin, string name) => SqliteObjectExists(plugin, name, SqliteObjectType.Trigger);
-		public static bool SqliteColumnExists(this IPlugin plugin, string tableOrViewName, string columnName) => (int)(plugin.DbScalar(SQLITE_QUERY_COLUMN_EXISTS, default, new SqliteParameter("@name", tableOrViewName), new SqliteParameter("@columnName", columnName)) ?? 0) == 1;
+		public static bool SqliteColumnExists(this IPlugin plugin, string tableOrViewName, string columnName) => (long)(plugin.DbScalar(SQLITE_QUERY_COLUMN_EXISTS, default, new SqliteParameter("@name", tableOrViewName), new SqliteParameter("@columnName", columnName)) ?? 0L) == 1L;
 
 		public static Task<bool> SqliteTableExistsAsync(this IPlugin plugin, string name, CancellationToken cancellationToken) => SqliteObjectExistsAsync(plugin, name, SqliteObjectType.Table, cancellationToken);
 		public static Task<bool> SqliteIndexExistsAsync(this IPlugin plugin, string name, CancellationToken cancellationToken) => SqliteObjectExistsAsync(plugin, name, SqliteObjectType.Index, cancellationToken);
 		public static Task<bool> SqliteViewExistsAsync(this IPlugin plugin, string name, CancellationToken cancellationToken) => SqliteObjectExistsAsync(plugin, name, SqliteObjectType.View, cancellationToken);
 		public static Task<bool> SqliteTriggerExistsAsync(this IPlugin plugin, string name, CancellationToken cancellationToken) => SqliteObjectExistsAsync(plugin, name, SqliteObjectType.Trigger, cancellationToken);
-		public static async Task<bool> SqliteColumnExistsAsync(this IPlugin plugin, string tableOrViewName, string columnName, CancellationToken cancellationToken) => (int)(await plugin.DbScalarAsync(SQLITE_QUERY_COLUMN_EXISTS, default, cancellationToken, new SqliteParameter("@name", tableOrViewName), new SqliteParameter("@columnName", columnName)).ConfigureAwait(false) ?? 0) == 1;
+		public static async Task<bool> SqliteColumnExistsAsync(this IPlugin plugin, string tableOrViewName, string columnName, CancellationToken cancellationToken) => (long)(await plugin.DbScalarAsync(SQLITE_QUERY_COLUMN_EXISTS, default, cancellationToken, new SqliteParameter("@name", tableOrViewName), new SqliteParameter("@columnName", columnName)).ConfigureAwait(false) ?? 0L) == 1L;
+
+		public static void AddOrUpdate<K, V>(this IDictionary<K, V> dictionary, K key, V value)
+		{
+			if (!dictionary.TryAdd(key, value))
+				dictionary[key] = value;
+		}
+
+		public static T ConfigDictionaryToModel<T>(this IDictionary<string, string?> dictionary) where T : class
+		{
+			T returnValue = Activator.CreateInstance<T>();
+
+			foreach (PropertyInfo propertyInfo in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                if (dictionary.ContainsKey(propertyInfo.Name))
+                    propertyInfo.SetValue(returnValue, Convert.ChangeType(dictionary[propertyInfo.Name], propertyInfo.PropertyType));
+
+			return returnValue;
+		}
+
+		public static IDictionary<string, string?> ModelToConfigDictionary<T>(this T model) where T : class
+		{
+            IDictionary<string, string?> returnValue = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (PropertyInfo propertyInfo in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                returnValue.Add(propertyInfo.Name, propertyInfo.GetValue(model)?.ToString());
+
+			return returnValue;
+		}
 	}
 }

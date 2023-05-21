@@ -40,7 +40,10 @@
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="*" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="*" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="*" />
-		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="*" />
+		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="*">
+			<Private>false</Private>
+			<ExcludeAssets>runtime</ExcludeAssets>
+		</PackageReference>
 		<PackageReference Include="System.Text.Json" Version="*" />
 	</ItemGroup>
 
