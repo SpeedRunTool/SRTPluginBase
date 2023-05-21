@@ -32,7 +32,17 @@ namespace SRTPluginBase
         public virtual void SaveConfiguration(T configuration) => configuration.SaveConfiguration(null);
         public void SaveConfiguration(T configuration, string? configFile = null) => configuration.SaveConfiguration(configFile);
 
-		public virtual async Task<int> DbNonQuery(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters)
+		public virtual int DbNonQuery(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters)
+		{
+			using (SqliteCommand sqliteCommand = new SqliteCommand(query, sqliteConnection, dbTransaction as SqliteTransaction))
+			{
+				if (dbDataParameters is not null)
+					sqliteCommand.Parameters.AddRange(dbDataParameters);
+
+				return sqliteCommand.ExecuteNonQuery();
+			}
+		}
+		public virtual async Task<int> DbNonQueryAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters)
 		{
 			using (SqliteCommand sqliteCommand = new SqliteCommand(query, sqliteConnection, dbTransaction as SqliteTransaction))
 			{
@@ -43,7 +53,17 @@ namespace SRTPluginBase
 			}
 		}
 
-		public virtual async Task<object?> DbScalar(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters)
+		public virtual object? DbScalar(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters)
+		{
+			using (SqliteCommand sqliteCommand = new SqliteCommand(query, sqliteConnection, dbTransaction as SqliteTransaction))
+			{
+				if (dbDataParameters is not null)
+					sqliteCommand.Parameters.AddRange(dbDataParameters);
+
+				return sqliteCommand.ExecuteScalar();
+			}
+		}
+		public virtual async Task<object?> DbScalarAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters)
 		{
 			using (SqliteCommand sqliteCommand = new SqliteCommand(query, sqliteConnection, dbTransaction as SqliteTransaction))
 			{
@@ -54,7 +74,17 @@ namespace SRTPluginBase
 			}
 		}
 
-		public virtual async Task<IDataReader?> DbReader(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters)
+		public virtual IDataReader? DbReader(string query, IDbTransaction? dbTransaction, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters)
+		{
+			using (SqliteCommand sqliteCommand = new SqliteCommand(query, sqliteConnection, dbTransaction as SqliteTransaction))
+			{
+				if (dbDataParameters is not null)
+					sqliteCommand.Parameters.AddRange(dbDataParameters);
+
+				return sqliteCommand.ExecuteReader(commandBehavior);
+			}
+		}
+		public virtual async Task<IDataReader?> DbReaderAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters)
 		{
 			using (SqliteCommand sqliteCommand = new SqliteCommand(query, sqliteConnection, dbTransaction as SqliteTransaction))
 			{
