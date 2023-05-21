@@ -13,8 +13,8 @@
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
 		<Copyright>Copyright © 2023 $(Company)</Copyright>
-		<Version>4.0.5</Version>
-		<FileVersion>4.0.5</FileVersion>
+		<Version>4.0.6</Version>
+		<FileVersion>4.0.6</FileVersion>
 		<AssemblyVersion>4.0.0</AssemblyVersion>
 		<PackageId>SRTPluginBase</PackageId>
 		<PackageDescription>$(Description)</PackageDescription>
@@ -40,7 +40,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="*" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="*" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="*" />
-		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="*" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="*" />
 		<PackageReference Include="System.Text.Json" Version="*" />
 	</ItemGroup>
 
