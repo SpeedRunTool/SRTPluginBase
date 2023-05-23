@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@ namespace SRTPluginBase
         private readonly SqliteConnection sqliteConnection;
 
 		protected IDictionary<string, Func<Controller, Task<IActionResult>>> registeredPages;
+		[JsonIgnore(Condition = JsonIgnoreCondition.Always)]
 		public IReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>> RegisteredPages => new ReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>>(registeredPages);
 
         public PluginBase()
