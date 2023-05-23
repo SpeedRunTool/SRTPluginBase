@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,15 +19,7 @@ namespace SRTPluginBase
         /// </summary>
         IPluginInfo Info { get; }
 
-        /// <summary>
-        /// This method is called when an HTTP request comes in that is not automatically handled by the SRT framework.
-        /// </summary>
-        /// <param name="controller">The controller that received the request.</param>
-        /// <returns>An Task&gt;IActionResult&lt; for the request.</returns>
-        virtual Task<IActionResult> HttpHandlerAsync(Controller controller)
-        {
-            return Task.FromResult<IActionResult>(controller.NoContent());
-        }
+        IReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>> RegisteredPages { get; }
 
 		virtual int DbNonQuery(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => default;
 		virtual Task<int> DbNonQueryAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<int>(default);

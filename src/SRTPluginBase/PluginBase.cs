@@ -1,6 +1,8 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Reflection;
@@ -14,6 +16,9 @@ namespace SRTPluginBase
 		private const string DB_CONFIGURATION_TABLE_NAME = "Config";
         private readonly SqliteConnection sqliteConnection;
 
+		protected IDictionary<string, Func<Controller, Task<IActionResult>>> registeredPages;
+		public IReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>> RegisteredPages => new ReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>>(registeredPages);
+
         public PluginBase()
         {
             SqliteConnectionStringBuilder sqliteConnectionStringBuilder = new SqliteConnectionStringBuilder()
@@ -23,8 +28,9 @@ namespace SRTPluginBase
 			};
 			sqliteConnection = new SqliteConnection(sqliteConnectionStringBuilder.ToString());
             sqliteConnection.Open();
+			registeredPages = new Dictionary<string, Func<Controller, Task<IActionResult>>>(StringComparer.OrdinalIgnoreCase);
 
-			if (!this.SqliteTableExists(DB_CONFIGURATION_TABLE_NAME))
+            if (!this.SqliteTableExists(DB_CONFIGURATION_TABLE_NAME))
 			{
 				DbNonQuery($"""
                     CREATE TABLE "{DB_CONFIGURATION_TABLE_NAME}" (
