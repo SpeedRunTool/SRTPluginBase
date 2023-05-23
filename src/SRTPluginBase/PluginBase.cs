@@ -31,7 +31,6 @@ namespace SRTPluginBase
 			sqliteConnection = new SqliteConnection(sqliteConnectionStringBuilder.ToString());
             sqliteConnection.Open();
 			registeredPages = new Dictionary<string, Func<Controller, Task<IActionResult>>>(StringComparer.OrdinalIgnoreCase);
-			LastConfigurationUpdate = DateTimeOffset.MinValue;
 
             if (!this.SqliteTableExists(DB_CONFIGURATION_TABLE_NAME))
 			{
@@ -50,30 +49,24 @@ namespace SRTPluginBase
 
         public IPluginConfiguration? Configuration { get; protected set; }
 
-        public DateTimeOffset LastConfigurationUpdate { get; protected set; }
-
 		public string GetConfigFile(Assembly a) => a.GetConfigFile();
 
 		public virtual T LoadConfiguration()
 		{
-            LastConfigurationUpdate = DateTimeOffset.UtcNow;
             return Extensions.LoadConfiguration<T>(null);
 		}
 		public T LoadConfiguration(string? configFile = null)
 		{
-            LastConfigurationUpdate = DateTimeOffset.UtcNow;
             return Extensions.LoadConfiguration<T>(configFile);
 		}
 
 		public virtual void SaveConfiguration(T configuration)
 		{
             configuration.SaveConfiguration(null);
-            LastConfigurationUpdate = DateTimeOffset.UtcNow;
         }
 		public void SaveConfiguration(T configuration, string? configFile = null)
 		{
             configuration.SaveConfiguration(configFile);
-            LastConfigurationUpdate = DateTimeOffset.UtcNow;
         }
 
 		public virtual IDictionary<string, string?> DbLoadConfiguration()
@@ -91,7 +84,6 @@ namespace SRTPluginBase
 				}
 			}
 
-            LastConfigurationUpdate = DateTimeOffset.UtcNow;
             return returnValue;
 		}
 
@@ -104,8 +96,6 @@ namespace SRTPluginBase
 				else
 					DbNonQuery($"INSERT INTO [{DB_CONFIGURATION_TABLE_NAME}] ([Key], [Value]) VALUES (@key, @value);", default, new SqliteParameter("@key", kvp.Key), new SqliteParameter("@value", kvp.Value));
 			}
-
-            LastConfigurationUpdate = DateTimeOffset.UtcNow;
         }
 
 		private bool DbRecordExists(string tableName, string columnName, object? columnValue) => (long)(DbScalar($"SELECT IIF(EXISTS(SELECT 1 FROM {tableName} WHERE [{columnName}] = @columnValue), 1, 0);", default, new SqliteParameter("@columnValue", columnValue)) ?? 0L) == 1L;
