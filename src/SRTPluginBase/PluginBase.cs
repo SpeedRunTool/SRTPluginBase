@@ -41,17 +41,35 @@ namespace SRTPluginBase
                     );
                     """, default);
 			}
-		}
+        }
 
 		public abstract IPluginInfo Info { get; }
 
+		public DateTimeOffset LastConfigurationUpdate { get; protected set; }
+
 		public string GetConfigFile(Assembly a) => a.GetConfigFile();
 
-		public virtual T LoadConfiguration() => Extensions.LoadConfiguration<T>(null);
-        public T LoadConfiguration(string? configFile = null) => Extensions.LoadConfiguration<T>(configFile);
+		public virtual T LoadConfiguration()
+		{
+            LastConfigurationUpdate = DateTimeOffset.UtcNow;
+            return Extensions.LoadConfiguration<T>(null);
+		}
+		public T LoadConfiguration(string? configFile = null)
+		{
+            LastConfigurationUpdate = DateTimeOffset.UtcNow;
+            return Extensions.LoadConfiguration<T>(configFile);
+		}
 
-        public virtual void SaveConfiguration(T configuration) => configuration.SaveConfiguration(null);
-        public void SaveConfiguration(T configuration, string? configFile = null) => configuration.SaveConfiguration(configFile);
+		public virtual void SaveConfiguration(T configuration)
+		{
+            configuration.SaveConfiguration(null);
+            LastConfigurationUpdate = DateTimeOffset.UtcNow;
+        }
+		public void SaveConfiguration(T configuration, string? configFile = null)
+		{
+            configuration.SaveConfiguration(configFile);
+            LastConfigurationUpdate = DateTimeOffset.UtcNow;
+        }
 
 		public virtual IDictionary<string, string?> DbLoadConfiguration()
 		{
@@ -68,7 +86,8 @@ namespace SRTPluginBase
 				}
 			}
 
-			return returnValue;
+            LastConfigurationUpdate = DateTimeOffset.UtcNow;
+            return returnValue;
 		}
 
 		public virtual void DbSaveConfiguration(IDictionary<string, string?> config)
@@ -80,7 +99,9 @@ namespace SRTPluginBase
 				else
 					DbNonQuery($"INSERT INTO [{DB_CONFIGURATION_TABLE_NAME}] ([Key], [Value]) VALUES (@key, @value);", default, new SqliteParameter("@key", kvp.Key), new SqliteParameter("@value", kvp.Value));
 			}
-		}
+
+            LastConfigurationUpdate = DateTimeOffset.UtcNow;
+        }
 
 		private bool DbRecordExists(string tableName, string columnName, object? columnValue) => (long)(DbScalar($"SELECT IIF(EXISTS(SELECT 1 FROM {tableName} WHERE [{columnName}] = @columnValue), 1, 0);", default, new SqliteParameter("@columnValue", columnValue)) ?? 0L) == 1L;
 		private async Task<bool> DbRecordExistsAsync(string tableName, string columnName, object? columnValue, CancellationToken cancellationToken) => (long)(await DbScalarAsync($"SELECT IIF(EXISTS(SELECT 1 FROM {tableName} WHERE [{columnName}] = @columnValue), 1, 0);", default, cancellationToken, new SqliteParameter("@columnValue", columnValue)).ConfigureAwait(false) ?? 0L) == 1L;
