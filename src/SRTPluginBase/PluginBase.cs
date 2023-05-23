@@ -29,6 +29,7 @@ namespace SRTPluginBase
 			sqliteConnection = new SqliteConnection(sqliteConnectionStringBuilder.ToString());
             sqliteConnection.Open();
 			registeredPages = new Dictionary<string, Func<Controller, Task<IActionResult>>>(StringComparer.OrdinalIgnoreCase);
+			LastConfigurationUpdate = DateTimeOffset.MinValue;
 
             if (!this.SqliteTableExists(DB_CONFIGURATION_TABLE_NAME))
 			{
@@ -45,7 +46,9 @@ namespace SRTPluginBase
 
 		public abstract IPluginInfo Info { get; }
 
-		public DateTimeOffset LastConfigurationUpdate { get; protected set; }
+        public IPluginConfiguration? Configuration { get; protected set; }
+
+        public DateTimeOffset LastConfigurationUpdate { get; protected set; }
 
 		public string GetConfigFile(Assembly a) => a.GetConfigFile();
 
