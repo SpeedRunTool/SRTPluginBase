@@ -12,7 +12,7 @@
 		/// </summary>
 		public bool Hidden { get; private set; }
 
-		public RegisteredPagesKey(string name, bool hidden = true)
+		public RegisteredPagesKey(string name, bool hidden = false)
 		{
 			Name = name;
 			Hidden = hidden;
