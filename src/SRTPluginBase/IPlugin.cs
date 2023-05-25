@@ -19,7 +19,7 @@ namespace SRTPluginBase
         /// </summary>
         IPluginInfo Info { get; }
 
-        IReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>> RegisteredPages { get; }
+        IReadOnlyDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>> RegisteredPages { get; }
 
 		virtual int DbNonQuery(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => default;
 		virtual Task<int> DbNonQueryAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => Task.FromResult<int>(default);

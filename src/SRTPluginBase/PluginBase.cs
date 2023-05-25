@@ -17,9 +17,9 @@ namespace SRTPluginBase
 		private const string DB_CONFIGURATION_TABLE_NAME = "Config";
         private readonly SqliteConnection sqliteConnection;
 
-		protected IDictionary<string, Func<Controller, Task<IActionResult>>> registeredPages;
+		protected IDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>> registeredPages;
 		[JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-		public IReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>> RegisteredPages => new ReadOnlyDictionary<string, Func<Controller, Task<IActionResult>>>(registeredPages);
+		public IReadOnlyDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>> RegisteredPages => new ReadOnlyDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>>(registeredPages);
 
         public PluginBase()
         {
@@ -30,7 +30,7 @@ namespace SRTPluginBase
 			};
 			sqliteConnection = new SqliteConnection(sqliteConnectionStringBuilder.ToString());
             sqliteConnection.Open();
-			registeredPages = new Dictionary<string, Func<Controller, Task<IActionResult>>>(StringComparer.OrdinalIgnoreCase);
+			registeredPages = new Dictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>>(RegisteredPagesKeyComparer.DefaultComparer);
 
             if (!this.SqliteTableExists(DB_CONFIGURATION_TABLE_NAME))
 			{
