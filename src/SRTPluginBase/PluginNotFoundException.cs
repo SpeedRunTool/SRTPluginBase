@@ -9,6 +9,6 @@ namespace SRTPluginBase
 	{
 		public string PluginName { get; private set; }
 
-		public PluginNotFoundException(string pluginName) : base() => (PluginName) = (pluginName);
+		public PluginNotFoundException(string pluginName) : base($"Unable to locate loaded plugin {pluginName} in IPluginHost instance") => (PluginName) = (pluginName);
 	}
 }
