@@ -9,6 +9,6 @@ namespace SRTPluginBase
 	{
 		public string PluginName { get; private set; }
 
-		public PluginInitializationException(string pluginName) : base() => (PluginName) = (pluginName);
+		public PluginInitializationException(string pluginName, string? message = default) : base(message) => (PluginName) = (pluginName);
 	}
 }
