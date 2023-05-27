@@ -19,6 +19,9 @@ namespace SRTPluginBase
         /// </summary>
         IPluginInfo Info { get; }
 
+        /// <summary>
+        /// Registered pages for the plugin host to display and handle.
+        /// </summary>
         IReadOnlyDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>> RegisteredPages { get; }
 
 		virtual int DbNonQuery(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => default;

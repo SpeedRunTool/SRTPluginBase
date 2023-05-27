@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace SRTPluginBase
 {
@@ -44,7 +46,13 @@ namespace SRTPluginBase
         /// </summary>
         int VersionRevision { get; }
 
-        public new bool Equals(IPluginInfo? other) =>
+        /// <summary>
+        /// The version of this plugin.
+        /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
+        Version Version { get; }
+
+        new bool Equals(IPluginInfo? other) =>
             Name == other?.Name &&
             Description == other?.Description &&
             Author == other?.Author &&
@@ -54,8 +62,8 @@ namespace SRTPluginBase
             VersionBuild == other?.VersionBuild &&
             VersionRevision == other?.VersionRevision;
 
-        public bool Equals(object? obj) => Equals(obj as IPluginInfo);
+        bool Equals(object? obj) => Equals(obj as IPluginInfo);
 
-        public int GetHashCode() => HashCode.Combine(Name, Description, Author, MoreInfoURL, VersionMajor, VersionMinor, VersionBuild, VersionRevision);
+        int GetHashCode() => HashCode.Combine(Name, Description, Author, MoreInfoURL, VersionMajor, VersionMinor, VersionBuild, VersionRevision);
     }
 }
