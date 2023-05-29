@@ -13,8 +13,8 @@
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
 		<Copyright>Copyright © 2023 $(Company)</Copyright>
-		<Version>4.0.11</Version>
-		<FileVersion>4.0.11</FileVersion>
+		<Version>4.0.0</Version>
+		<FileVersion>4.0.0</FileVersion>
 		<AssemblyVersion>4.0.0</AssemblyVersion>
 		<PackageId>SRTPluginBase</PackageId>
 		<PackageDescription>$(Description)</PackageDescription>
