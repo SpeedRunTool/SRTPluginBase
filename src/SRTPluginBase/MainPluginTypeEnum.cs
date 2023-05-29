@@ -1,6 +1,6 @@
 ﻿namespace SRTPluginBase
 {
-    public enum MasterPluginTypeEnum : int
+    public enum MainPluginTypeEnum : int
     {
         Producer = 0,
         Consumer = 1,

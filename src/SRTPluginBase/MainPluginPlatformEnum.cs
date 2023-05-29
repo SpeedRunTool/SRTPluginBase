@@ -1,6 +1,6 @@
 ﻿namespace SRTPluginBase
 {
-    public enum MasterPluginPlatformEnum : int
+    public enum MainPluginPlatformEnum : int
     {
         Any = 0, // AnyCPU
         x86 = 1, // x86 (32-bit)

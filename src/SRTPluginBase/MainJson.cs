@@ -1,14 +1,12 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace SRTPluginBase
 {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    public class MasterPluginEntry
+    public class MainJson
     {
-        public string Name { get; set; }
-        public MasterPluginPlatformEnum Platform { get; set; }
-        public MasterPluginTypeEnum Type { get; set; }
-        public Uri ManifestURL { get; set; }
+        public MainHostEntry Host { get; set; }
+        public IEnumerable<MainPluginEntry> Plugins { get; set; }
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 }
