@@ -10,11 +10,6 @@ namespace SRTPluginBase
     public interface IPlugin : IDisposable, IAsyncDisposable, IEquatable<IPlugin>
     {
         /// <summary>
-        /// Gets the plugins type name.
-        /// </summary>
-        string TypeName => this.GetType().Name;
-
-        /// <summary>
         /// Information about this plugin.
         /// </summary>
         IPluginInfo Info { get; }
@@ -33,10 +28,10 @@ namespace SRTPluginBase
 		virtual IDataReader? DbReader(string query, IDbTransaction? dbTransaction, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => default;
 		virtual Task<IDataReader?> DbReaderAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => Task.FromResult<IDataReader?>(default);
 
-		public new bool Equals(IPlugin? other) => TypeName == other?.TypeName && Info.Name == other?.Info.Name;
+		public new bool Equals(IPlugin? other) => GetType().Name == other?.GetType().Name && Info.Name == other?.Info.Name;
 
         public bool Equals(object? obj) => Equals(obj as IPlugin);
 
-        public int GetHashCode() => HashCode.Combine(TypeName, Info);
+        public int GetHashCode() => HashCode.Combine(GetType().Name, Info);
     }
 }
