@@ -10,8 +10,8 @@ namespace SRTPluginBase
 {
     public sealed class ConfigurationDB<T> : IDisposable, IAsyncDisposable
     {
-        private const string DB_CONFIGURATION_FOLDER_NAME = ".db";
-        private const string DB_CONFIGURATION_TABLE_NAME = "Config";
+        public const string DB_CONFIGURATION_FOLDER_NAME = ".db";
+        public const string DB_CONFIGURATION_TABLE_NAME = "Config";
 
         private readonly SqliteConnection sqliteConnection;
 
