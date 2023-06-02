@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,29 +28,9 @@ namespace SRTPluginBase
 
         public IPluginConfiguration? Configuration { get; protected set; }
 
-		public string GetConfigFile(Assembly a) => a.GetConfigFile();
+        public IDictionary<string, string?> LoadConfiguration() => pluginConfigDatabase.DbLoadConfiguration();
 
-		public virtual T LoadConfiguration()
-		{
-            return Extensions.LoadConfiguration<T>(null);
-		}
-		public T LoadConfiguration(string? configFile = null)
-		{
-            return Extensions.LoadConfiguration<T>(configFile);
-		}
-
-		public virtual void SaveConfiguration(T configuration)
-		{
-            configuration.SaveConfiguration(null);
-        }
-		public void SaveConfiguration(T configuration, string? configFile = null)
-		{
-            configuration.SaveConfiguration(configFile);
-        }
-
-        public IDictionary<string, string?> DbLoadConfiguration() => pluginConfigDatabase.DbLoadConfiguration();
-
-        public void DbSaveConfiguration(IDictionary<string, string?> config) => pluginConfigDatabase.DbSaveConfiguration(config);
+        public void SaveConfiguration(IDictionary<string, string?> config) => pluginConfigDatabase.DbSaveConfiguration(config);
 
         public bool DbRecordExists(string tableName, string columnName, object? columnValue) => (long)(pluginConfigDatabase.DbScalar($"SELECT IIF(EXISTS(SELECT 1 FROM {tableName} WHERE [{columnName}] = @columnValue), 1, 0);", default, new SqliteParameter("@columnValue", columnValue)) ?? 0L) == 1L;
 
@@ -69,7 +48,11 @@ namespace SRTPluginBase
 
         public Task<IDataReader?> DbReaderAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbReaderAsync(query, dbTransaction, cancellationToken, commandBehavior, dbDataParameters);
 
-        public abstract ValueTask DisposeAsync();
+        public virtual async ValueTask DisposeAsync()
+        {
+            if (pluginConfigDatabase is not null)
+                await pluginConfigDatabase.DisposeAsync();
+        }
 
         public abstract void Dispose();
 
@@ -77,7 +60,7 @@ namespace SRTPluginBase
         {
             if (disposing)
             {
-
+                pluginConfigDatabase?.Dispose();
             }
         }
 
