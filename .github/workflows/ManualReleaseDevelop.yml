@@ -77,7 +77,7 @@ jobs:
       
     - name: Decode the pfx
       run: |
-        Set-Content -Path 'CodeSign.txt' -Value '${{ secrets.CERTIFICATE }}'
+        Set-Content -Path 'CodeSign.txt' -Value '${{ secrets.CODE_SIGN_CERTIFICATE }}'
         certutil -decode 'CodeSign.txt' 'CodeSign.pfx'
         Remove-Item -Path 'CodeSign.txt'
         
@@ -85,7 +85,7 @@ jobs:
       run: |
         $filesToZip = (Get-ChildItem -Path 'src/' -Filter *.nupkg -Recurse).fullname
         foreach ($fileToZip in $filesToZip) {
-        & dotnet nuget sign "$fileToZip" --certificate-path "CodeSign.pfx" --certificate-password "${{secrets.CERTIFICATE_PASS}}" --timestamper "http://timestamp.digicert.com"
+        & dotnet nuget sign "$fileToZip" --certificate-path "CodeSign.pfx" --certificate-password "${{secrets.CODE_SIGN_CERTIFICATE_PASS}}" --timestamper "http://timestamp.digicert.com"
         }
 
     - name: Publish
