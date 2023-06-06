@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,6 +26,8 @@ namespace SRTPluginBase
         }
 
 		public abstract IPluginInfo Info { get; }
+
+        public abstract ILogger Logger { get; }
 
         public IPluginConfiguration? Configuration { get; protected set; }
 

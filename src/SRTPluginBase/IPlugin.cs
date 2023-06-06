@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +14,8 @@ namespace SRTPluginBase
         /// Information about this plugin.
         /// </summary>
         IPluginInfo Info { get; }
+
+        ILogger Logger { get; }
 
         /// <summary>
         /// Registered pages for the plugin host to display and handle.
