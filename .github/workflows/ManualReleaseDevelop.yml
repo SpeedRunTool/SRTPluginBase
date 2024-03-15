@@ -80,13 +80,18 @@ jobs:
         Set-Content -Path 'CodeSign.txt' -Value '${{ secrets.CODE_SIGN_CERTIFICATE }}'
         certutil -decode 'CodeSign.txt' 'CodeSign.pfx'
         Remove-Item -Path 'CodeSign.txt'
-        
-    - name: Code sign the nupkg
-      run: |
-        $filesToZip = (Get-ChildItem -Path 'src/' -Filter *.nupkg -Recurse).fullname
-        foreach ($fileToZip in $filesToZip) {
-        & dotnet nuget sign "$fileToZip" --certificate-path "CodeSign.pfx" --certificate-password "${{secrets.CODE_SIGN_CERTIFICATE_PASS}}" --timestamper "http://timestamp.digicert.com"
-        }
+
+# Code signigng certificate went from $233/yr to $633/yr.
+# They also required an HSM (Hardware Security Module (USB Key)) or a subscription service for signing.
+# Self-signing certificate yields error NU3018.
+# As an open source developer who was using code signing certificates as base-64 encoded pfx files stored in GitHub secrets, this 'new way' is untenable and greatly interferes with our workflow.
+# For now we'll just have to not sign our packages...
+#    - name: Code sign the nupkg
+#      run: |
+#        $filesToZip = (Get-ChildItem -Path 'src/' -Filter *.nupkg -Recurse).fullname
+#        foreach ($fileToZip in $filesToZip) {
+#        & dotnet nuget sign "$fileToZip" --certificate-path "CodeSign.pfx" --certificate-password "${{secrets.CODE_SIGN_CERTIFICATE_PASS}}" --timestamper "http://timestamp.digicert.com"
+#        }
 
     - name: Publish
       run: nuget push **\*.nupkg -Source "https://api.nuget.org/v3/index.json" -ApiKey "${{secrets.NUGET_API_KEY}}" -SkipDuplicate
