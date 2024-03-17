@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text.Json.Serialization;
 
-namespace SRTPluginBase
+namespace SRTPluginBase.Interfaces
 {
     public interface IPluginInfo : IEquatable<IPluginInfo>
     {

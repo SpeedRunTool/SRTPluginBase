@@ -1,4 +1,4 @@
-﻿namespace SRTPluginBase
+﻿namespace SRTPluginBase.Implementations
 {
     public enum MainPluginPlatformEnum : int
     {

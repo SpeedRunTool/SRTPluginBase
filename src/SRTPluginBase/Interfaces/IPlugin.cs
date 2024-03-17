@@ -6,7 +6,7 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SRTPluginBase
+namespace SRTPluginBase.Interfaces
 {
     public interface IPlugin : IDisposable, IAsyncDisposable, IEquatable<IPlugin>
     {

@@ -1,4 +1,4 @@
-﻿namespace SRTPluginBase
+﻿namespace SRTPluginBase.Interfaces
 {
     public interface IPluginConfiguration
     {

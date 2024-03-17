@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SRTPluginBase
+namespace SRTPluginBase.Interfaces
 {
     public interface IPluginConsumer : IPlugin, IEquatable<IPluginConsumer>
     {

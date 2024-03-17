@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json.Serialization;
+using SRTPluginBase.Interfaces;
 
 namespace SRTPluginBase
 {
