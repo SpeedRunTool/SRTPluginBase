@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Net.Http.Json;
 
 namespace SRTPluginBase
 {
@@ -22,6 +24,14 @@ namespace SRTPluginBase
             action.Invoke(name, value);
             cascadingStateChanger?.NotifyStateChanged(); // Allows us to re-render another component (NavMenu) from this component. StateHasChanged alone does not allow us to do that.
             return Task.CompletedTask;
+        }
+
+        public static async Task<T?> GetSRTJsonAsync<T>(this HttpClient client, string uri) => await GetSRTJsonAsync<T>(client, new Uri(uri, UriKind.RelativeOrAbsolute));
+        public static async Task<T?> GetSRTJsonAsync<T>(this HttpClient client, Uri uri)
+        {
+            HttpResponseMessage manifestsResult = await client.GetAsync(uri);
+            manifestsResult.EnsureSuccessStatusCode();
+            return await manifestsResult.Content.ReadFromJsonAsync<T>();
         }
     }
 }
