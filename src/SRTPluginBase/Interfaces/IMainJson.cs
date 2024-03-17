@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SRTPluginBase.Implementations;
 
 namespace SRTPluginBase.Interfaces
 {
@@ -9,12 +10,12 @@ namespace SRTPluginBase.Interfaces
         /// <summary>
         /// An array of plugin hosts.
         /// </summary>
-        public IEnumerable<IMainHostEntry> Hosts { get; set; }
+        public IEnumerable<MainHostEntry> Hosts { get; set; }
 
         /// <summary>
         /// An array of plugins.
         /// </summary>
-        public IEnumerable<IMainPluginEntry> Plugins { get; set; }
+        public IEnumerable<MainPluginEntry> Plugins { get; set; }
 
         #endregion
     }

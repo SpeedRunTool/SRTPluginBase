@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SRTPluginBase.Implementations;
 
 namespace SRTPluginBase.Interfaces
 {
@@ -14,7 +15,7 @@ namespace SRTPluginBase.Interfaces
         /// <summary>
         /// An array of releases for this entry.
         /// </summary>
-        public IEnumerable<IManifestReleaseJson> Releases { get; set; }
+        public IEnumerable<ManifestReleaseJson> Releases { get; set; }
 
         #endregion
     }
