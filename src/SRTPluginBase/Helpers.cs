@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Json;
+using System.Diagnostics;
 
 namespace SRTPluginBase
 {
@@ -26,12 +27,21 @@ namespace SRTPluginBase
             return Task.CompletedTask;
         }
 
-        public static async Task<T?> GetSRTJsonAsync<T>(this HttpClient client, string uri) => await GetSRTJsonAsync<T>(client, new Uri(uri, UriKind.RelativeOrAbsolute));
+        public static async Task<T?> GetSRTJsonAsync<T>(this HttpClient client, string uri) => await GetSRTJsonAsync<T>(client, new Uri(uri, UriKind.RelativeOrAbsolute)).ConfigureAwait(false);
         public static async Task<T?> GetSRTJsonAsync<T>(this HttpClient client, Uri uri)
         {
-            HttpResponseMessage manifestsResult = await client.GetAsync(uri);
-            manifestsResult.EnsureSuccessStatusCode();
-            return await manifestsResult.Content.ReadFromJsonAsync<T>();
+            try
+            {
+                HttpResponseMessage manifestsResult = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                if (manifestsResult.IsSuccessStatusCode)
+                    return await manifestsResult.Content.ReadFromJsonAsync<T>().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debugger.Break();
+            }
+
+            return default;
         }
     }
 }
