@@ -72,7 +72,7 @@ jobs:
         run: dotnet build $env:SOLUTION /p:"Configuration=${{inputs.buildConfig}};Platform=$env:BUILD_PLATFORM;VERSION=${{steps.project-version-string.outputs.Version}}" --no-restore --verbosity normal
 
       - name: Run tests
-        run: dotnet test /p:"Configuration=${{inputs.buildConfig}};Platform=$env:BUILD_PLATFORM;VERSION=${{steps.project-version-string.outputs.Version}}" --no-restore --no-build --verbosity normal
+        run: dotnet test $env:SOLUTION /p:"Configuration=${{inputs.buildConfig}};Platform=$env:BUILD_PLATFORM;VERSION=${{steps.project-version-string.outputs.Version}}" --no-restore --no-build --verbosity normal
 
       - name: Publish
         run: nuget push **\*.nupkg -Source "https://api.nuget.org/v3/index.json" -ApiKey "${{secrets.NUGET_API_KEY}}" -SkipDuplicate
