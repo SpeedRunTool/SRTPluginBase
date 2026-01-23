@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using SRTPluginBase.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,14 +12,9 @@ namespace SRTPluginBase
 	{
 		private ConfigurationDB<T> pluginConfigDatabase;
 
-        protected IDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>> registeredPages;
-		[JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-		public IReadOnlyDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>> RegisteredPages => new ReadOnlyDictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>>(registeredPages);
-
         public PluginBase()
         {
 			pluginConfigDatabase = new ConfigurationDB<T>();
-            registeredPages = new Dictionary<RegisteredPagesKey, Func<Controller, Task<IActionResult>>>(RegisteredPagesKeyComparer.DefaultComparer);
         }
 
 		public abstract IPluginInfo Info { get; }
