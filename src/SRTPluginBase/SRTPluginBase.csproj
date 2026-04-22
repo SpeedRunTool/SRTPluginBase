@@ -13,9 +13,9 @@
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
 		<Copyright>Copyright © 2023 $(Company)</Copyright>
-		<Version>4.0.0</Version>
-		<FileVersion>4.0.0</FileVersion>
-		<AssemblyVersion>4.0.0</AssemblyVersion>
+		<Version>4.5.0</Version>
+		<FileVersion>4.5.0</FileVersion>
+		<AssemblyVersion>4.5.0</AssemblyVersion>
 		<PackageId>SRTPluginBase</PackageId>
 		<PackageDescription>$(Description)</PackageDescription>
 		<RepositoryUrl>https://github.com/$(Company)/$(PackageId)</RepositoryUrl>
@@ -37,17 +37,17 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.203">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="*" />
-		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="*">
+		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.7">
 			<Private>false</Private>
 			<ExcludeAssets>runtime</ExcludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
-		<PackageReference Include="System.Text.Json" Version="*" />
+		<PackageReference Include="System.Text.Json" Version="10.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,8 +1,4 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using System;
-using System.Text.Json.Serialization;
-using SRTPluginBase.Implementations;
+﻿using System;
 
 namespace SRTPluginBase.Interfaces
 {
@@ -36,23 +32,5 @@ namespace SRTPluginBase.Interfaces
         public Uri ManifestURL { get; set; }
 
         #endregion
-
-        #region Non-serialized Properties
-
-        /// <summary>
-        /// The manifest file's contents deserialized from the ManifestURL.
-        /// </summary>
-        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
-        public ManifestEntryJson? Manifest { get; }
-
-        #endregion
-
-        /// <summary>
-        /// Deserializes the manifest located at the Uri ManifestURL.
-        /// </summary>
-        /// <param name="client">An HttpClient instance to use when retrieving the manifest json.</param>
-        /// <returns>A asynchronous Task instance for this request.</returns>
-        public abstract Task SetManifestAsync(HttpClient client);
-        
     }
 }
