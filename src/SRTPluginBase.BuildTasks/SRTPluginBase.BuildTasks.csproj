@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+	  The build-time half of the contracts package: reads a freshly compiled plugin assembly and
+	  emits the srtplugin.json manifest beside it.
+
+	  This is NOT packed as its own package. Its output is folded into SRTPluginBase under tasks/,
+	  and SRTPluginBase's buildTransitive/ targets point a UsingTask at it - so a plugin author gets
+	  the generator by referencing the one package they already reference.
+
+	  Two target frameworks because MSBuild has two hosts: Visual Studio and msbuild.exe run on .NET
+	  Framework, `dotnet build` runs on .NET. The targets file picks the folder off
+	  $(MSBuildRuntimeType). netstandard2.0 would technically load in both, but its dependency
+	  closure needs binding redirects the .NET Framework host does not supply for a task-assembly
+	  probing path, and this is the shape the .NET SDK uses for its own tasks.
+
+	  net48 rather than the more usual net472: .NET Framework 4.x releases are in-place upgrades, so
+	  all this asks of a plugin author is that the machine running the .NET Framework MSBuild have 4.8
+	  present - which Visual Studio 2022 and later require regardless. 4.8.1 is deliberately not used:
+	  it gains nothing here and would confine building to Windows 10 21H2 and later, its substantive
+	  addition being ARM64 support that nothing in this repo targets.
+	-->
+	<PropertyGroup>
+		<TargetFramework></TargetFramework>
+		<TargetFrameworks>net48;net10.0</TargetFrameworks>
+		<OutputType>Library</OutputType>
+		<IsPackable>false</IsPackable>
+		<!-- The task assembly is loaded by path, never resolved from a lock file, so its whole
+		     dependency closure has to sit next to it in the output directory. -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);NU1701</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--
+		  ExcludeAssets=runtime: MSBuild supplies these to the task at run time. Shipping our own
+		  copies next to the task assembly would load a second, conflicting MSBuild.
+		-->
+		<PackageReference Include="Microsoft.Build.Framework" Version="17.14.28" ExcludeAssets="runtime" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.28" ExcludeAssets="runtime" PrivateAssets="all" />
+		<PackageReference Include="System.Reflection.MetadataLoadContext" Version="10.0.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<!-- SourceLink is inherited from Directory.Build.props and has nothing to do here. -->
+	<ItemGroup>
+		<PackageReference Remove="Microsoft.SourceLink.GitHub" />
+		<None Remove="..\..\README.md" />
+		<None Remove="..\..\LICENSE" />
+	</ItemGroup>
+
+</Project>

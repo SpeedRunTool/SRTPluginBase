@@ -2,10 +2,11 @@
   <Folder Name="/Solution Items/">
     <File Path="../.github/workflows/AutomatedRelease.yml" />
     <File Path="../.gitignore" />
+    <File Path="../nuget.config" />
     <File Path="../README.md" />
     <File Path="Directory.Build.props" />
-    <File Path="nuget.config" />
   </Folder>
   <Project Path="SRTPluginBase.Abstractions/SRTPluginBase.Abstractions.csproj" />
   <Project Path="SRTPluginBase/SRTPluginBase.csproj" />
+  <Project Path="SRTPluginBase.BuildTasks/SRTPluginBase.BuildTasks.csproj" />
 </Solution>

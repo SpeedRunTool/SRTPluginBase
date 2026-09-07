@@ -6,6 +6,12 @@
 		<Product>SRT Plugin Base</Product>
 		<Description>Base classes and helpers for writing an SRT Host plugin. Reference this; it brings in SRTPluginBase.Abstractions.</Description>
 		<PackageDescription>$(Description)</PackageDescription>
+		<!--
+		  NU5100: "assembly outside lib/ will not be referenced". That is the point - everything under
+		  tasks/ is loaded by MSBuild through a UsingTask path, and referencing it from a plugin
+		  project would put a build-time reflection library on the plugin's own reference list.
+		-->
+		<NoWarn>$(NoWarn);NU5100</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,5 +22,56 @@
 	<ItemGroup>
 		<ProjectReference Include="..\SRTPluginBase.Abstractions\SRTPluginBase.Abstractions.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="buildTransitive\SRTPluginBase.props" Pack="true" PackagePath="buildTransitive\" />
+		<None Include="buildTransitive\SRTPluginBase.targets" Pack="true" PackagePath="buildTransitive\" />
+	</ItemGroup>
+
+	<!--
+	  Fold the srtplugin.json generator and its dependency closure into tasks/<tfm>/.
+
+	  It ships inside this package rather than as one of its own so that a plugin author gets it from
+	  the single reference they already have.
+
+	  Both frameworks are packed no matter which one this build ran on: the package is consumed by
+	  Visual Studio (.NET Framework MSBuild) and by `dotnet build` (.NET MSBuild), and
+	  buildTransitive/SRTPluginBase.targets picks the folder at consumption time off
+	  $(MSBuildRuntimeType). Packing only the building machine's flavour would produce a package that
+	  works nowhere else.
+
+	  Microsoft.Build.* is excluded because MSBuild hands those to the task itself; a second copy on
+	  the task's probing path loads a second object model and the task fails to bind.
+	-->
+	<Target Name="_SrtPackBuildTasks" BeforeTargets="_GetPackageFiles" DependsOnTargets="_SrtBuildTaskAssemblies">
+		<ItemGroup>
+			<_SrtTaskFile Include="..\SRTPluginBase.BuildTasks\bin\$(Configuration)\net48\*.dll" TasksFolder="net48" />
+			<_SrtTaskFile Include="..\SRTPluginBase.BuildTasks\bin\$(Configuration)\net10.0\*.dll" TasksFolder="net10.0" />
+			<_SrtTaskFile Remove="@(_SrtTaskFile)" Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Build'))" />
+
+			<None Include="@(_SrtTaskFile)" Pack="true" PackagePath="tasks\%(_SrtTaskFile.TasksFolder)\" Visible="false" />
+		</ItemGroup>
+
+		<Error Condition="'@(_SrtTaskFile)' == ''"
+		       Text="No manifest-generator binaries were found to pack; tasks/ would ship empty and every plugin build would fail to load the task." />
+	</Target>
+
+	<!--
+	  Deliberately an MSBuild call rather than a ProjectReference. A ProjectReference to a
+	  multi-targeted project has to pin one TargetFramework to resolve, and packing needs both legs;
+	  nothing here compiles against the task, so ordering is the only thing actually required.
+	-->
+	<Target Name="_SrtBuildTaskAssemblies">
+		<!--
+		  Configuration and Platform are passed so these match the global properties a solution build
+		  already uses for this project. MSBuild caches results per project *and* global property set,
+		  so matching them makes this a cache hit rather than a second, concurrent build of the same
+		  project writing the same obj\ and bin\ directories - which is a live risk now that
+		  GeneratePackageOnBuild runs pack inside every build.
+		-->
+		<MSBuild Projects="..\SRTPluginBase.BuildTasks\SRTPluginBase.BuildTasks.csproj"
+		         Targets="Build"
+		         Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+	</Target>
 
 </Project>

@@ -1,0 +1,133 @@
+<Project>
+
+	<!--
+	  Generates srtplugin.json next to a plugin assembly.
+
+	  The host process is AnyCPU and must never load a plugin just to find out what it is - not least
+	  because half of them are x86. The manifest is what lets it enumerate, describe and filter
+	  plugins without loading a single one, and generating it here means an author never writes or
+	  maintains one by hand.
+
+	  buildTransitive/ rather than build/, so this still reaches a project that picks SRTPluginBase up
+	  through a plugin SDK or shared props rather than naming it itself.
+	-->
+
+	<PropertyGroup>
+		<!--
+		  MSBuild runs on .NET Framework inside Visual Studio and msbuild.exe, and on .NET under
+		  `dotnet build`. The task assembly ships once per host.
+		-->
+		<_SrtBuildTasksTfm Condition="'$(MSBuildRuntimeType)' == 'Core'">net10.0</_SrtBuildTasksTfm>
+		<_SrtBuildTasksTfm Condition="'$(_SrtBuildTasksTfm)' == ''">net48</_SrtBuildTasksTfm>
+
+		<!--
+		  Overridable so this same file can be imported straight out of a source clone of the
+		  contracts repo, where there is no tasks/ folder because nothing has been packed. That is how
+		  the host builds its demo plugins under -p:SRTUseLocalContracts=true.
+		-->
+		<SrtBuildTasksAssembly Condition="'$(SrtBuildTasksAssembly)' == ''">$(MSBuildThisFileDirectory)..\tasks\$(_SrtBuildTasksTfm)\SRTPluginBase.BuildTasks.dll</SrtBuildTasksAssembly>
+
+		<SrtManifestFileName Condition="'$(SrtManifestFileName)' == ''">srtplugin.json</SrtManifestFileName>
+		<_SrtManifestIntermediatePath>$(IntermediateOutputPath)$(SrtManifestFileName)</_SrtManifestIntermediatePath>
+	</PropertyGroup>
+
+	<!--
+	  Only a project that references SRTPluginBase *directly* is treated as a plugin.
+
+	  buildTransitive/ deliberately flows down the whole reference graph, which means this file is also
+	  imported into every test project, tool and sample that merely references a plugin - none of which
+	  carry [SrtPluginAssembly], and all of which would then fail with SRT1001. A direct reference is
+	  the closest thing to a declaration of intent available here: SRTPluginBase exists to be
+	  referenced by plugins, and nothing else has a reason to name it.
+
+	  Deliberately not counting SRTPluginBase.Abstractions: the host and its plugin runners reference
+	  the abstractions because they implement the other side of the contract, and are not plugins.
+
+	  The detection itself sits inside the target below because neither an item list (MSB4099) nor
+	  built-in metadata (MSB4190) may appear in a condition evaluated outside one.
+	-->
+	<UsingTask TaskName="SRTPluginBase.BuildTasks.GenerateSrtPluginManifest"
+	           AssemblyFile="$(SrtBuildTasksAssembly)" />
+
+	<!--
+	  After Compile, because the assembly has to exist to be read, and before
+	  GetCopyToOutputDirectoryItems, because that is what carries the result into bin\ and into
+	  publish\. Both orderings are guaranteed: CopyFilesToOutputDirectory depends on
+	  GetCopyToOutputDirectoryItems and runs after Compile.
+
+	  Inputs/Outputs give it a real incremental check, so an untouched plugin does not re-run a
+	  MetadataLoadContext load on every build.
+
+	  The plugin-or-not decision is made inside the target rather than in a property above it, because
+	  MSBuild does not allow an item list in a condition evaluated outside a target (MSB4099).
+
+	  Skipped entirely during a design-time build. A manifest is a build output and contributes
+	  nothing to IntelliSense, and running there is actively harmful: a design-time build compiles
+	  nothing, so there is frequently no assembly to read - Visual Studio also evaluates a project
+	  under the solution's platform, which for an AnyCPU plugin in an x64 solution points
+	  IntermediateOutputPath at an obj\x64\... directory no real build ever wrote. Failing there does
+	  not just skip the manifest: it fails the whole design-time build, and the editor loses every
+	  resolved reference at once, so a project that compiles perfectly fills with CS0246.
+	-->
+	<Target Name="GenerateSrtPluginManifest"
+	        Condition="'$(DesignTimeBuild)' != 'true' AND '$(SkipCompilerExecution)' != 'true'"
+	        AfterTargets="Compile"
+	        BeforeTargets="GetCopyToOutputDirectoryItems"
+	        DependsOnTargets="ResolveAssemblyReferences"
+	        Inputs="@(IntermediateAssembly)"
+	        Outputs="$(_SrtManifestIntermediatePath)">
+
+		<ItemGroup>
+			<_SrtContractsDirectReference Include="@(PackageReference)" Condition="'%(Identity)' == 'SRTPluginBase'" />
+			<_SrtContractsDirectReference Include="@(ProjectReference)" Condition="'%(Filename)' == 'SRTPluginBase'" />
+		</ItemGroup>
+
+		<PropertyGroup>
+			<!--
+			  Set SrtGenerateManifest explicitly to overrule the detection either way: true for a
+			  plugin that reaches the contracts through some indirection, false for a helper assembly
+			  that references SRTPluginBase without being a plugin itself.
+			-->
+			<_SrtGenerateManifest Condition="'$(SrtGenerateManifest)' != ''">$(SrtGenerateManifest)</_SrtGenerateManifest>
+			<_SrtGenerateManifest Condition="'$(_SrtGenerateManifest)' == '' AND '@(_SrtContractsDirectReference)' != ''">true</_SrtGenerateManifest>
+			<_SrtGenerateManifest Condition="'$(_SrtGenerateManifest)' == ''">false</_SrtGenerateManifest>
+
+			<_SrtIntermediateAssembly>@(IntermediateAssembly->'%(FullPath)')</_SrtIntermediateAssembly>
+		</PropertyGroup>
+
+		<!--
+		  The Exists guard is not redundant with the design-time condition above. Any target that
+		  reaches this one out of the normal build order - an IDE's up-to-date check, a partial target
+		  invocation, a Platform this project was never built for - would otherwise hand the task a
+		  path to nothing, and a manifest is never worth failing someone's build over.
+		-->
+		<GenerateSrtPluginManifest Condition="'$(_SrtGenerateManifest)' == 'true' AND Exists('$(_SrtIntermediateAssembly)')"
+		                           AssemblyPath="$(_SrtIntermediateAssembly)"
+		                           ReferencePaths="@(ReferencePathWithRefAssemblies)"
+		                           OutputPath="$(_SrtManifestIntermediatePath)"
+		                           ExpectedContractGeneration="$(SrtContractGeneration)" />
+	</Target>
+
+	<!--
+	  Adding the item lives in its own target, outside the incremental one above: when the manifest is
+	  already up to date MSBuild skips GenerateSrtPluginManifest entirely, and an ItemGroup inside a
+	  skipped target never runs - the file would then quietly stop being copied to bin\.
+	-->
+	<Target Name="_SrtIncludeManifestInOutput"
+	        DependsOnTargets="GenerateSrtPluginManifest"
+	        BeforeTargets="GetCopyToOutputDirectoryItems;GetCopyToPublishDirectoryItems"
+	        Condition="Exists('$(_SrtManifestIntermediatePath)')">
+
+		<ItemGroup>
+			<ContentWithTargetPath Include="$(_SrtManifestIntermediatePath)"
+			                       TargetPath="$(SrtManifestFileName)"
+			                       CopyToOutputDirectory="PreserveNewest"
+			                       CopyToPublishDirectory="PreserveNewest" />
+		</ItemGroup>
+	</Target>
+
+	<Target Name="_SrtCleanManifest" AfterTargets="CoreClean">
+		<Delete Files="$(_SrtManifestIntermediatePath)" />
+	</Target>
+
+</Project>

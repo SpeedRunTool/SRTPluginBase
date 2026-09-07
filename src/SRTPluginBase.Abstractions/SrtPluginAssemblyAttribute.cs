@@ -19,14 +19,15 @@ namespace SRTPluginBase.Abstractions;
 /// </para>
 /// Apply it once, in the plugin assembly:
 /// <code>
-/// [assembly: SrtPluginAssembly("com.example.mygame.producer", typeof(MyProducer))]
+/// [assembly: SrtPluginAssembly("JohnDoe.MyGame.Producer", typeof(MyProducer))]
 /// </code>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 public sealed class SrtPluginAssemblyAttribute(string id, Type pluginType) : Attribute
 {
     /// <summary>
-    /// The plugin's stable identity, in reverse-DNS form. See <see cref="IPluginInfo.Id"/>.
+    /// The plugin's stable identity, shaped <c>&lt;Author&gt;.&lt;Subject&gt;.&lt;Name&gt;</c>. See
+    /// <see cref="IPluginInfo.Id"/> for the convention and the constraints.
     /// </summary>
     /// <remarks>
     /// Declared here, as a compile-time constant, rather than only on <see cref="IPluginInfo"/>,
@@ -39,10 +40,17 @@ public sealed class SrtPluginAssemblyAttribute(string id, Type pluginType) : Att
     public Type PluginType { get; } = pluginType;
 
     /// <summary>
-    /// The contract generation this plugin targets. Defaults to whatever it compiled against, which
-    /// is nearly always what you want.
+    /// Overrides the contract generation. Leave it alone: zero means "whatever this plugin compiled
+    /// against", which <see cref="SrtContract.GenerationOf"/> reads from the assembly reference.
     /// </summary>
-    public int Generation { get; init; } = SrtContract.Generation;
+    /// <remarks>
+    /// Deliberately <em>not</em> defaulted to <see cref="SrtContract.Generation"/>. That default is
+    /// compiled into the Abstractions assembly rather than into the plugin, so it would be evaluated
+    /// against whichever copy the host had loaded and every plugin would report the host's own
+    /// generation - turning the compatibility check into a tautology. It would also be invisible to
+    /// the build-time manifest generator, which reads metadata and never runs a constructor.
+    /// </remarks>
+    public int Generation { get; init; }
 
     /// <summary>
     /// Overrides the architecture inferred from the assembly's PE header. Only needed when a plugin

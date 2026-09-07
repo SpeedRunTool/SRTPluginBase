@@ -90,7 +90,7 @@ public sealed record PluginInfo : IPluginInfo
             Version = VersionOf(assembly),
             Kind = isProducer ? PluginKind.Producer : PluginKind.Consumer,
             Architecture = marker.Architecture,
-            ContractGeneration = marker.Generation,
+            ContractGeneration = marker.Generation != 0 ? marker.Generation : SrtContract.GenerationOf(assembly),
             RequiresUiThread = marker.RequiresUiThread,
         };
     }

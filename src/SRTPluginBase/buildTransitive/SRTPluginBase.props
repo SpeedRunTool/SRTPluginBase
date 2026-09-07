@@ -1,0 +1,13 @@
+<Project>
+
+	<PropertyGroup>
+		<!--
+		  The contract generation this package defines, mirroring SrtContract.Generation. It is here
+		  as well as in code because the manifest generator runs before anything is loaded and so
+		  cannot read the constant; the pair is checked against what the plugin actually declares,
+		  which is what would catch them drifting.
+		-->
+		<SrtContractGeneration Condition="'$(SrtContractGeneration)' == ''">5</SrtContractGeneration>
+	</PropertyGroup>
+
+</Project>

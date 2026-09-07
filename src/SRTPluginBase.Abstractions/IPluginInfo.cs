@@ -7,8 +7,8 @@ namespace SRTPluginBase.Abstractions;
 public interface IPluginInfo
 {
     /// <summary>
-    /// Stable, unique, immutable identity in reverse-DNS form, e.g.
-    /// <c>com.speedruntool.re4r.producer</c>.
+    /// Stable, unique, immutable identity, shaped like a NuGet package id -
+    /// <c>&lt;Author&gt;.&lt;Subject&gt;.&lt;Name&gt;</c>, e.g. <c>SpeedRunTool.RE4R.Producer</c>.
     /// </summary>
     /// <remarks>
     /// This must never change across versions of a plugin: it keys the plugin's configuration file,
@@ -18,6 +18,23 @@ public interface IPluginInfo
     /// practice - the shipped RE8 overlay is a copy of the RE2 one and still declares both the
     /// namespace and the class as <c>SRTPluginUIRE2DirectXOverlay</c>, so the two collided whenever
     /// both were loaded. An explicit id removes the possibility.
+    /// </para>
+    /// <para>
+    /// The convention is the one .NET already uses for assemblies, namespaces and package ids, rather
+    /// than the reverse-DNS form Java and Apple settled on. Uniqueness comes from the leading author
+    /// segment, so that segment names <em>you</em>: a third-party plugin is
+    /// <c>JohnDoe.RE4R.Overlay</c>, never <c>SRT.</c>-prefixed, which would read as first-party.
+    /// </para>
+    /// <para>
+    /// Nothing parses this. The trailing segment in particular is a free-form distinguisher and not a
+    /// declaration of <see cref="Kind"/>, which is derived from the interface the plugin implements
+    /// precisely so it cannot be stated wrongly - and an id that never changes is the last place that
+    /// should restate a derived fact. Naming a plugin <c>...Producer</c> because it is one is fine;
+    /// anything relying on that being true is not.
+    /// </para>
+    /// <para>
+    /// It also becomes a file name, so it is limited to letters, digits, <c>.</c>, <c>_</c> and
+    /// <c>-</c>, with no empty segments.
     /// </para>
     /// </remarks>
     string Id { get; }

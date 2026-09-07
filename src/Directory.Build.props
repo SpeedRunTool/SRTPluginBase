@@ -43,7 +43,7 @@ et10.0 - with Debug and
 	  unpublishing, and the first stable is a one-way door. CI overrides these.
 	-->
 	<PropertyGroup>
-		<Version>5.0.0-alpha.1</Version>
+		<Version>5.0.0-alpha.3</Version>
 		<FileVersion>5.0.0.0</FileVersion>
 		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 	</PropertyGroup>
@@ -57,6 +57,31 @@ et10.0 - with Debug and
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<OutputPath>bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+
+	<!--
+	  Pack on every build, into the repo-root artifacts\ folder that SRTHost's nuget.config consumes
+	  as a local feed.
+
+	  Packing is otherwise a separate step nobody remembers, and forgetting it is invisible rather
+	  than loud: SRTHost keeps restoring the last version NuGet extracted into %USERPROFILE%\.nuget\
+	  packages and builds green against contracts that no longer match the source next door.
+
+	  Which brings up the limit of this, and it is worth knowing before trusting it. NuGet caches an
+	  extracted package by *version*, so republishing 5.0.0-alpha.3 with different content changes
+	  nothing downstream - the cached copy still wins, whatever is sitting in artifacts\. Repacking is
+	  only picked up after either bumping the version or deleting
+	  %USERPROFILE%\.nuget\packages\srtpluginbase\<version>. To iterate on the contracts themselves,
+	  build the host with -p:SRTUseLocalContracts=true, which references these projects directly and
+	  takes packaging out of the loop entirely.
+
+	  Configuration is deliberately not part of the package version, so a Debug build and a Release
+	  build write the same file name and the last one wins. That is fine for a local feed - the API is
+	  identical either way - but it does mean artifacts\ reflects whatever was built most recently.
+	-->
+	<PropertyGroup>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)..\artifacts\</PackageOutputPath>
 	</PropertyGroup>
 
 	<!--
