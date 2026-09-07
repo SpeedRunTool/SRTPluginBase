@@ -1,64 +1,67 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SRTPluginBase.Interfaces;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
+using SRTPluginBase.Abstractions;
 
-namespace SRTPluginBase
+namespace SRTPluginBase;
+
+/// <summary>
+/// Base class for a plugin. Handles context capture, logger resolution and disposal so a plugin only
+/// implements what it actually does.
+/// </summary>
+public abstract class PluginBase : IPlugin
 {
-    public abstract class PluginBase<T> : IPlugin where T : class, IPlugin
-	{
-		private ConfigurationDB<T> pluginConfigDatabase;
+    private IPluginContext? context;
+    private ILogger? logger;
+    private bool disposed;
 
-        public PluginBase()
-        {
-			pluginConfigDatabase = new ConfigurationDB<T>();
-        }
+    /// <inheritdoc />
+    public abstract IPluginInfo Info { get; }
 
-		public abstract IPluginInfo Info { get; }
+    /// <summary>
+    /// The host context. Throws if read before <see cref="InitializeAsync"/> has run, which is a
+    /// programming error rather than a runtime condition worth handling.
+    /// </summary>
+    protected IPluginContext Context
+        => context ?? throw new InvalidOperationException(
+            $"{nameof(Context)} is not available until {nameof(InitializeAsync)} has been called.");
 
-        public abstract ILogger Logger { get; }
+    /// <summary>A logger for this plugin. Output is forwarded to the host's log and its log viewer.</summary>
+    protected ILogger Logger
+        => logger ??= Context.Services.GetService<ILoggerFactory>()?.CreateLogger(Info.Id)
+            ?? NullLogger.Instance;
 
-        public IPluginConfiguration? Configuration { get; protected set; }
+    /// <inheritdoc />
+    public virtual ValueTask InitializeAsync(IPluginContext pluginContext, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(pluginContext);
+        context = pluginContext;
+        return ValueTask.CompletedTask;
+    }
 
-        public IDictionary<string, string?> LoadConfiguration() => pluginConfigDatabase.DbLoadConfiguration();
+    /// <inheritdoc />
+    public virtual ValueTask StartAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
 
-        public void SaveConfiguration(IDictionary<string, string?> config) => pluginConfigDatabase.DbSaveConfiguration(config);
+    /// <inheritdoc />
+    public virtual ValueTask StopAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
 
-        public bool DbRecordExists(string tableName, string columnName, object? columnValue) => (long)(pluginConfigDatabase.DbScalar($"SELECT IIF(EXISTS(SELECT 1 FROM {tableName} WHERE [{columnName}] = @columnValue), 1, 0);", default, new SqliteParameter("@columnValue", columnValue)) ?? 0L) == 1L;
+    /// <summary>
+    /// Release resources. Override this rather than <see cref="DisposeAsync"/>; the base class
+    /// guarantees it runs exactly once.
+    /// </summary>
+    protected virtual ValueTask DisposeAsyncCore() => ValueTask.CompletedTask;
 
-        public async Task<bool> DbRecordExistsAsync(string tableName, string columnName, object? columnValue, CancellationToken cancellationToken) => (long)(await pluginConfigDatabase.DbScalarAsync($"SELECT IIF(EXISTS(SELECT 1 FROM {tableName} WHERE [{columnName}] = @columnValue), 1, 0);", default, cancellationToken, new SqliteParameter("@columnValue", columnValue)).ConfigureAwait(false) ?? 0L) == 1L;
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        // Sealed against the override-and-forget-to-chain bug in the previous generation, where
+        // Dispose() was abstract and Dispose(bool) was never called, so every derived plugin leaked
+        // its database connection.
+        if (disposed)
+            return;
 
-        public int DbNonQuery(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbNonQuery(query, dbTransaction, dbDataParameters);
-
-        public Task<int> DbNonQueryAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbNonQueryAsync(query, dbTransaction, cancellationToken, dbDataParameters);
-
-        public object? DbScalar(string query, IDbTransaction? dbTransaction, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbScalar(query, dbTransaction, dbDataParameters);
-
-        public Task<object?> DbScalarAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbScalarAsync(query, dbTransaction, cancellationToken, dbDataParameters);
-
-        public IDataReader? DbReader(string query, IDbTransaction? dbTransaction, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbReader(query, dbTransaction, commandBehavior, dbDataParameters);
-
-        public Task<IDataReader?> DbReaderAsync(string query, IDbTransaction? dbTransaction, CancellationToken cancellationToken, CommandBehavior commandBehavior = CommandBehavior.Default, params IDbDataParameter[] dbDataParameters) => pluginConfigDatabase.DbReaderAsync(query, dbTransaction, cancellationToken, commandBehavior, dbDataParameters);
-
-        public virtual async ValueTask DisposeAsync()
-        {
-            if (pluginConfigDatabase is not null)
-                await pluginConfigDatabase.DisposeAsync();
-        }
-
-        public abstract void Dispose();
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                pluginConfigDatabase?.Dispose();
-            }
-        }
-
-        public bool Equals(IPlugin? other) => (this as IPlugin).Equals(other);
-	}
+        disposed = true;
+        await DisposeAsyncCore().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
 }

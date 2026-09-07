@@ -1,30 +1,80 @@
 <Project>
 	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Platforms>AnyCPU</Platforms>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<!--
+	  Give $(Configuration) a value before OutputPath below consumes it. Directory.Build.props is
+	  imported before the SDK applies its own Debug default, so otherwise $(Configuration) expands to
+	  an empty string and output lands in bin
+et10.0 rather than bin\Debug
+et10.0 - with Debug and
+	  Release then overwriting each other in the same directory.
+	-->
+	<PropertyGroup>
+		<Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<Company>SpeedRunTool</Company>
 		<Authors>$(Company)</Authors>
 		<CopyrightYear>$([System.DateTime]::UtcNow.ToString("yyyy"))</CopyrightYear>
 		<Copyright>Copyright © $(CopyrightYear) $(Company)</Copyright>
-		<RepositoryUrl>https://github.com/$(CompanyName)/SRTPluginBase</RepositoryUrl>
+		<!-- Was $(CompanyName), which is never defined anywhere - the URL silently lost its owner. -->
+		<RepositoryUrl>https://github.com/$(Company)/SRTPluginBase</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageTags>srt;srthost;speedrun;plugin</PackageTags>
+	</PropertyGroup>
+
+	<!--
+	  Version for the whole repo. SRTPluginBase has only ever published pre-releases (4.0.x-beta and
+	  one 5.0.0-beta), so 5.0.0 will be its first stable - and it deliberately matches the SRT Host
+	  major, so host major == contract generation == package major.
+
+	  Stays a pre-release until the ported plugins actually run against it; nuget.org does not allow
+	  unpublishing, and the first stable is a one-way door. CI overrides these.
+	-->
+	<PropertyGroup>
+		<Version>5.0.0-alpha.1</Version>
+		<FileVersion>5.0.0.0</FileVersion>
+		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Nullable>enable</Nullable>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<OutputPath>bin\$(Configuration)</OutputPath>
-		<PublishPath>bin\$(Configuration)\publish</PublishPath>
-		<DefineConstants>$(DefineConstants);$(Platform)</DefineConstants>
+	</PropertyGroup>
+
+	<!--
+	  Was set unconditionally, which made every local build claim to be a CI build and pin
+	  deterministic source paths that only make sense on the build agent.
+	-->
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)'=='true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
+		<None Include="..\..\LICENSE" Pack="true" PackagePath="\" Visible="false" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102">

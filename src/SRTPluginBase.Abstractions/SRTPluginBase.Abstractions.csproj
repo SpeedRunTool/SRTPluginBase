@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<PackageId>SRTPluginBase.Abstractions</PackageId>
+		<Product>SRT Plugin Base Abstractions</Product>
+		<Description>The interfaces, enums and attributes that define an SRT Host plugin. Referenced by both the host and plugins; depends on nothing.</Description>
+		<PackageDescription>$(Description)</PackageDescription>
+	</PropertyGroup>
+
+	<!--
+	  This package must have ZERO package references, and that is a design constraint rather than an
+	  accident of the current surface.
+
+	  The plugin runner loads this assembly into the default load context so that contract types are
+	  reference-identical between the runner and the plugin - the thing that makes a cast across the
+	  boundary work at all. Every dependency added here would have to be unified the same way, and
+	  would become a version those two must agree on forever.
+
+	  Everything the surface needs is in the shared framework: IServiceProvider and the DataAnnotations
+	  validation attributes both live in Microsoft.NETCore.App. Convenience that needs Microsoft.Extensions.*
+	  or System.Text.Json belongs in the SRTPluginBase package next door, which plugins reference and
+	  the host does not.
+	-->
+
+</Project>

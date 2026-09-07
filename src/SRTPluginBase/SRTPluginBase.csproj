@@ -1,40 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>netstandard2.1</TargetFramework>
-		<LangVersion>latest</LangVersion>
-		<Platforms>AnyCPU</Platforms>
-	</PropertyGroup>
-	
-	<PropertyGroup>
-		<Product>SRT Plugin Base</Product>
-		<Description>The base classes and interfaces needed to implement a plugin for the SRTHost platform.</Description>
-		<Version>5.0.0</Version>
-		<FileVersion>5.0.0</FileVersion>
-		<AssemblyVersion>5.0.0</AssemblyVersion>
 		<PackageId>SRTPluginBase</PackageId>
+		<Product>SRT Plugin Base</Product>
+		<Description>Base classes and helpers for writing an SRT Host plugin. Reference this; it brings in SRTPluginBase.Abstractions.</Description>
 		<PackageDescription>$(Description)</PackageDescription>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-	</PropertyGroup>
-	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.3.9" />
-		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.2">
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
-		</PackageReference>
-		<PackageReference Include="System.Net.Http.Json" Version="10.0.2" />
-		<PackageReference Include="System.Text.Json" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
-		<None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+		<ProjectReference Include="..\SRTPluginBase.Abstractions\SRTPluginBase.Abstractions.csproj" />
 	</ItemGroup>
-  
+
 </Project>
