@@ -8,6 +8,11 @@ namespace SRTPluginBase;
 /// Base class for a consumer that reads a single JSON payload type. Handles deserialisation; you
 /// implement <see cref="OnPayloadAsync"/>.
 /// </summary>
+/// <remarks>
+/// If your consumer also has user-editable settings, derive from
+/// <see cref="ConfigurableConsumerPluginBase{TPayload, TConfiguration}"/> instead - a type gets one
+/// base class, so the combination has to be its own.
+/// </remarks>
 /// <typeparam name="TPayload">
 /// The payload type, from the producer's contract assembly. Note this is a reference to the payload
 /// contract only - never to the producer plugin itself.

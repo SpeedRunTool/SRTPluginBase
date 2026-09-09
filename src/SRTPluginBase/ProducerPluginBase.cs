@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using SRTPluginBase.Abstractions;
 
@@ -9,6 +8,11 @@ namespace SRTPluginBase;
 /// Base class for a producer that publishes <typeparamref name="TPayload"/> as JSON. Handles
 /// serialisation and change detection; you implement <see cref="RefreshAsync"/>.
 /// </summary>
+/// <remarks>
+/// If your producer also has user-editable settings, derive from
+/// <see cref="ConfigurableProducerPluginBase{TPayload, TConfiguration}"/> instead - a type gets one
+/// base class, so the combination has to be its own.
+/// </remarks>
 /// <typeparam name="TPayload">
 /// The payload type. Declare it in a separate dependency-free contract assembly so consumers can
 /// reference the payload without referencing your plugin.
@@ -16,9 +20,7 @@ namespace SRTPluginBase;
 public abstract class ProducerPluginBase<TPayload> : PluginBase, IProducerPlugin
     where TPayload : class
 {
-    private readonly ArrayBufferWriter<byte> scratch = new(initialCapacity: 4096);
-    private byte[] previous = [];
-    private int previousLength;
+    private readonly PayloadPublisher<TPayload> publisher = new();
 
     /// <inheritdoc />
     public abstract PayloadChannelDescriptor Channel { get; }
@@ -52,26 +54,7 @@ public abstract class ProducerPluginBase<TPayload> : PluginBase, IProducerPlugin
         ArgumentNullException.ThrowIfNull(destination);
 
         TPayload? payload = await RefreshAsync(cancellationToken).ConfigureAwait(false);
-        if (payload is null)
-            return false;
 
-        // Serialise into a reusable scratch buffer first so the previous payload can be compared
-        // before anything is handed to the transport.
-        scratch.ResetWrittenCount();
-        using (Utf8JsonWriter writer = new(scratch))
-            JsonSerializer.Serialize(writer, payload, PayloadTypeInfo);
-
-        ReadOnlySpan<byte> written = scratch.WrittenSpan;
-
-        if (SuppressUnchangedPayloads && written.SequenceEqual(previous.AsSpan(0, previousLength)))
-            return false;
-
-        if (previous.Length < written.Length)
-            previous = new byte[written.Length];
-        written.CopyTo(previous);
-        previousLength = written.Length;
-
-        destination.Write(written);
-        return true;
+        return publisher.TryWrite(payload, PayloadTypeInfo, destination, SuppressUnchangedPayloads);
     }
 }

@@ -1,32 +1,38 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization.Metadata;
 using SRTPluginBase.Abstractions;
 
 namespace SRTPluginBase;
 
 /// <summary>
-/// Base class for a plugin with user-editable settings. Handles loading, validating, persisting and
-/// applying them; you react in <see cref="OnConfigurationChangedAsync"/>.
+/// Base class for a plugin with user-editable settings that is neither a producer nor a consumer.
+/// Handles loading, validating and applying them; you react in
+/// <see cref="OnConfigurationChangedAsync"/>.
 /// </summary>
+/// <remarks>
+/// A type gets one base class, so the two combinations have their own:
+/// <see cref="ConfigurableProducerPluginBase{TPayload, TConfiguration}"/> and
+/// <see cref="ConfigurableConsumerPluginBase{TPayload, TConfiguration}"/>. All three share
+/// <see cref="PluginConfiguration{TConfiguration}"/>, so the rules are written once.
+/// </remarks>
 /// <typeparam name="TConfiguration">The settings model.</typeparam>
 public abstract class ConfigurablePluginBase<TConfiguration> : PluginBase, IConfigurablePlugin<TConfiguration>
     where TConfiguration : class, new()
 {
-    private TConfiguration configuration = new();
+    private readonly PluginConfiguration<TConfiguration> configuration = new();
 
     /// <inheritdoc />
-    public TConfiguration Configuration => configuration;
+    public TConfiguration Configuration => configuration.Current;
 
     /// <inheritdoc />
-    object IConfigurablePlugin.Configuration => configuration;
-
-    /// <inheritdoc />
-    public Type ConfigurationType => typeof(TConfiguration);
+    object IConfigurablePlugin.Configuration => configuration.Current;
 
     /// <summary>
     /// Source-generated serialisation metadata for <typeparamref name="TConfiguration"/>.
     /// </summary>
     protected abstract JsonTypeInfo<TConfiguration> ConfigurationTypeInfo { get; }
+
+    /// <inheritdoc />
+    JsonTypeInfo IConfigurablePlugin.ConfigurationTypeInfo => ConfigurationTypeInfo;
 
     /// <summary>Where the settings file lives. Defaults to the host's conventional location.</summary>
     protected virtual string ConfigurationFilePath => PluginConfigurationStore.GetDefaultPath(Info.Id);
@@ -43,40 +49,20 @@ public abstract class ConfigurablePluginBase<TConfiguration> : PluginBase, IConf
     {
         await base.InitializeAsync(pluginContext, cancellationToken).ConfigureAwait(false);
 
-        configuration = await PluginConfigurationStore
+        TConfiguration loaded = await configuration
             .LoadAsync(ConfigurationFilePath, ConfigurationTypeInfo, cancellationToken)
             .ConfigureAwait(false);
 
-        await OnConfigurationChangedAsync(configuration, cancellationToken).ConfigureAwait(false);
+        await OnConfigurationChangedAsync(loaded, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Adopting the settings does not write them anywhere. The host owns the settings file and
+    /// persists it only once the runner has accepted the change - see
+    /// <see cref="PluginConfiguration{TConfiguration}"/> for why there is exactly one writer.
+    /// </remarks>
     public async ValueTask ApplyConfigurationAsync(object newConfiguration, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(newConfiguration);
-
-        if (newConfiguration is not TConfiguration typed)
-        {
-            throw new ArgumentException(
-                $"Expected configuration of type {typeof(TConfiguration).FullName}, got {newConfiguration.GetType().FullName}.",
-                nameof(newConfiguration));
-        }
-
-        // The runner is authoritative on validation. The host validates the same DataAnnotations
-        // while the user types, but that is a convenience: settings can also arrive from a
-        // hand-edited JSON file, which never passed through the form at all.
-        List<ValidationResult> failures = [];
-        if (!Validator.TryValidateObject(typed, new ValidationContext(typed), failures, validateAllProperties: true))
-        {
-            throw new ValidationException(
-                "Configuration is invalid: " +
-                string.Join("; ", failures.Select(failure => failure.ErrorMessage)));
-        }
-
-        configuration = typed;
-        await OnConfigurationChangedAsync(typed, cancellationToken).ConfigureAwait(false);
-        await PluginConfigurationStore
-            .SaveAsync(ConfigurationFilePath, typed, ConfigurationTypeInfo, cancellationToken)
+        => await OnConfigurationChangedAsync(configuration.Adopt(newConfiguration), cancellationToken)
             .ConfigureAwait(false);
-    }
 }

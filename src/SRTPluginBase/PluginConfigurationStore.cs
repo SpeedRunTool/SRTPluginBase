@@ -15,6 +15,13 @@ namespace SRTPluginBase;
 /// the plugin directory: an in-app update replaces that directory wholesale, and settings stored
 /// beside the DLL would be destroyed by every update.
 /// </para>
+/// <para>
+/// <b>The host writes this file; a plugin normally only reads it.</b> The host reads it to fill
+/// <c>LoadPlugin.ConfigurationJson</c> and rewrites it once the runner has accepted a change, which
+/// keeps a single writer on a path that is replaced non-atomically-in-appearance through
+/// <see cref="File.Replace(string, string, string)"/>. <see cref="SaveAsync"/> stays public for a
+/// plugin hosted some other way, and for tests; the configurable base classes do not call it.
+/// </para>
 /// </remarks>
 public static class PluginConfigurationStore
 {

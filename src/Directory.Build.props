@@ -43,7 +43,7 @@ et10.0 - with Debug and
 	  unpublishing, and the first stable is a one-way door. CI overrides these.
 	-->
 	<PropertyGroup>
-		<Version>5.0.0-alpha.3</Version>
+		<Version>5.0.0-alpha.4</Version>
 		<FileVersion>5.0.0.0</FileVersion>
 		<AssemblyVersion>5.0.0.0</AssemblyVersion>
 	</PropertyGroup>
@@ -68,7 +68,7 @@ et10.0 - with Debug and
 	  packages and builds green against contracts that no longer match the source next door.
 
 	  Which brings up the limit of this, and it is worth knowing before trusting it. NuGet caches an
-	  extracted package by *version*, so republishing 5.0.0-alpha.3 with different content changes
+	  extracted package by *version*, so republishing 5.0.0-alpha.4 with different content changes
 	  nothing downstream - the cached copy still wins, whatever is sitting in artifacts\. Repacking is
 	  only picked up after either bumping the version or deleting
 	  %USERPROFILE%\.nuget\packages\srtpluginbase\<version>. To iterate on the contracts themselves,
