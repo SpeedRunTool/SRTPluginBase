@@ -62,7 +62,7 @@ internal static class ManifestReader
             throw new ManifestException(
                 "SRT1002",
                 $"The [SrtPluginAssembly] on '{Path.GetFileName(assemblyPath)}' could not be read. It must "
-                + "be applied as [assembly: SrtPluginAssembly(\"reverse.dns.id\", typeof(YourPlugin))].");
+                + "be applied as [assembly: SrtPluginAssembly(\"Author.Subject.Name\", typeof(YourPlugin))].");
         }
 
         if (string.IsNullOrWhiteSpace(id))

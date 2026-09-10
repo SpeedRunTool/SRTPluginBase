@@ -72,9 +72,16 @@ public sealed class SrtPluginAssemblyAttribute(string id, Type pluginType) : Att
 /// </summary>
 /// <remarks>
 /// The type must be an unmanaged struct with <see cref="System.Runtime.InteropServices.LayoutKind.Sequential"/>
-/// layout: no references, no strings, no variable-length arrays. The base classes verify this at
-/// startup and refuse to publish otherwise, and each frame carries a layout hash so a consumer built
-/// against a different version of the struct fails loudly instead of reading misaligned garbage.
+/// layout: no references, no strings, no variable-length arrays.
+/// <para>
+/// <strong>Reserved: nothing consumes this attribute yet.</strong> <see cref="PayloadCodec.Blittable"/>
+/// travels on the wire and a consumer is told which codec a frame carries, but the producer base
+/// classes publish JSON only - a producer wanting raw memory implements
+/// <see cref="IProducerPlugin.TryProduceAsync"/> itself and takes responsibility for layout
+/// agreement between the two sides. The intended safeguard is a per-frame layout hash, so that a
+/// consumer built against a different version of the struct fails loudly instead of reading
+/// misaligned garbage; until that exists, a version skew here is silent corruption.
+/// </para>
 /// <para>Reach for this only if profiling says JSON is too slow; JSON is the sane default.</para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
